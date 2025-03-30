@@ -391,6 +391,24 @@ class JobApplication(models.Model):
 
     class Meta:
         db_table = 'lts360_job_applications'  # Custom table name for the database
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'job_listing'],
+                name='unique_application_per_user_job'
+            )
+        ]
+
+    def clean(self):
+        # Custom validation to prevent duplicate applications
+        if JobApplication.objects.filter(
+                user=self.user,
+                job_listing=self.job_listing
+        ).exclude(pk=self.pk).exists():
+            raise ValidationError("This user has already applied to this job posting.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Enforce validation before saving
+        super().save(*args, **kwargs)
 
     @property
     def profile_url(self):
