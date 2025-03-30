@@ -5,11 +5,13 @@ from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator, EmailValidator
+from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator, EmailValidator, \
+    RegexValidator, FileExtensionValidator
 from phonenumber_field.formfields import PhoneNumberField
 
-from .models import JobPosting, CompanyProfile, RecruiterProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
+from .models import JobPosting, OrganizationProfile, RecruiterProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
     JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket
+from .templates.image_utils import compress_image
 
 HIGHLIGHTS_CHOICES = [
     ('free_food', 'Free Food'),
@@ -421,62 +423,133 @@ class UpdateStatusForm(forms.ModelForm):
     status = forms.ChoiceField(choices=STATUS_CHOICES, required=True)
 
 
-class CompanyProfileForm(forms.ModelForm):
+class OrganizationProfileForm(forms.ModelForm):
+    organization_name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Enter Organization Name',
+            'id': 'id_organization_name',
+            'maxlength': '100',
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9\s\-\.,&]+$',
+                message='Only letters, numbers, spaces, hyphens, commas, periods and ampersands are allowed',
+                code='invalid_organization_name'
+            )
+        ],
+        help_text="Maximum 100 characters (letters, numbers and basic punctuation only)",
+        required=True
+    )
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'your.company@example.com',
+            'id': 'id_email',
+            'autocomplete': 'email',
+        }),
+        validators=[
+            EmailValidator(message="Please enter a valid email address")
+        ],
+        help_text="Official company email address",
+        required=True
+    )
+
+    organization_address = forms.CharField(
+        max_length=500,
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Enter Organization Address',
+            'rows': 4,
+            'id': 'id_organization_address',
+            'maxlength': '500',
+        }),
+        validators=[
+            MaxLengthValidator(500, message="Maximum 500 characters allowed")
+        ],
+        help_text="Maximum 500 characters allowed",
+        required=True
+    )
+
     country = forms.ChoiceField(
         choices=COUNTRY_CHOICES,
         widget=forms.Select(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'id': 'id_country'
-        })
+        }),
+        help_text="Select your country",
+        required=True
     )
 
     state = forms.ChoiceField(
         widget=forms.Select(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'id': 'id_state'
-        })
+        }),
+        help_text="Select your state/province",
+        required=True
+    )
+
+    city = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Enter City',
+            'id': 'id_city',
+            'maxlength': '50',
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z\s\-]+$',
+                message='Only letters, spaces and hyphens are allowed',
+                code='invalid_city'
+            )
+        ],
+        help_text="Maximum 50 characters (letters and spaces only)",
+        required=True
+    )
+
+    postal_code = forms.CharField(
+        max_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Enter Postal Code',
+            'id': 'id_postal_code',
+            'maxlength': '10',
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9\-]+$',
+                message='Only letters, numbers and hyphens are allowed',
+                code='invalid_postal_code'
+            )
+        ],
+        help_text="Enter your postal/zip code (max 10 characters)",
+        required=True
+    )
+
+    logo = forms.ImageField(
+        required=True,
+        widget=forms.FileInput(attrs={
+            'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-200',
+            'accept': 'image/*',
+            'id': 'id_logo',
+        }),
+        help_text="Required. Upload company logo (max 2MB)",
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
+        ]
     )
 
     class Meta:
-        model = CompanyProfile
+        model = OrganizationProfile
         fields = [
             'organization_name', 'organization_address',
             'email', 'country', 'city', 'state', 'postal_code', 'logo'
         ]
 
-        widgets = {
-
-            'organization_name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Enter Organization Name',
-                'id': 'id_organization_name'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Enter Company Email',
-                'id': 'id_email'
-            }),
-            'organization_address': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Enter Organization Address',
-                'rows': 4,
-                'id': 'id_organization_address'
-            }),
-            'city': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Enter City',
-                'id': 'id_city'
-            }),
-            'postal_code': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Enter Postal Code',
-                'id': 'id_postal_code'
-            }),
-            'logo': forms.FileInput(attrs={
-                'class': 'block  w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-200',
-                'id': 'id_logo'
-            }),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -485,18 +558,60 @@ class CompanyProfileForm(forms.ModelForm):
             country = 'IN'  # Default country
             state = 'MH'  # Default state for India
         else:
-            country = self.instance.country  # Get the current country from the instance
-            state = self.instance.state  # Get the current state from the instance
+            country = self.instance.country
+            state = self.instance.state
 
-        # Set country field initial value
         self.fields['country'].initial = country
-        # Update state choices dynamically based on selected country
         self.fields['state'].choices = STATE_CHOICES.get(country, [])
-        self.fields['state'].initial = state  # Set the initial value of state field
+        self.fields['state'].initial = state
 
-    # Custom clean method if needed for additional validation
+        # Add onchange event to country field to update states
+        self.fields['country'].widget.attrs['onchange'] = 'updateStates(this)'
+
+    def clean_logo(self):
+        logo = self.cleaned_data.get('logo')
+
+        if logo:
+            # Check if it's a new file upload
+            if isinstance(logo, UploadedFile):
+                # Validate file size
+                if logo.size > 2 * 1024 * 1024:  # 2MB limit
+                    raise ValidationError("Image file too large (max 2MB)")
+
+                # Validate content type
+                if not logo.content_type.startswith('image'):
+                    raise ValidationError("File is not an image")
+
+                # Validate file extension
+                if not logo.name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    raise ValidationError("Invalid image file type (only .png, .jpg, .jpeg allowed)")
+                try:
+                    # Use the reusable compression function
+                    compressed_logo = compress_image(
+                        logo,
+                        max_size=(500, 500),
+                        quality=85,
+                        output_format='JPEG'  # or 'PNG' if you prefer
+                    )
+                    return compressed_logo
+                except ValueError as e:
+                    raise forms.ValidationError("Failed to upload image")
+
+        return logo
+
     def clean(self):
         cleaned_data = super().clean()
+        country = cleaned_data.get('country')
+        state = cleaned_data.get('state')
+
+        # Validate that the selected state belongs to the selected country
+        if country and state:
+            valid_states = dict(STATE_CHOICES.get(country, []))
+            if state not in valid_states:
+                raise ValidationError({
+                    'state': "Selected state is not valid for the chosen country"
+                })
+
         return cleaned_data
 
 
@@ -650,6 +765,20 @@ class RecruiterProfileForm(forms.ModelForm):
         required=True
     )
 
+    profile_picture = forms.ImageField(
+        required=True,
+        widget=forms.FileInput(attrs={
+            'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-200',
+            'accept': 'image/*',
+            'id': 'id_profile_picture',
+            'onchange': 'previewImage(this)',
+        }),
+        help_text="Required. Upload your profile picture (max 2MB)",
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
+        ]
+    )
+
     class Meta:
         model = RecruiterProfile
         fields = [
@@ -663,14 +792,7 @@ class RecruiterProfileForm(forms.ModelForm):
             'bio',
             'years_of_experience',
         ]
-        widgets = {
-            'profile_picture': forms.FileInput(attrs={
-                'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-200',
-                'accept': 'image/*',
-                'id': 'id_profile_picture',
-                'onchange': 'previewImage(this)',  # JavaScript function for image preview
-            }),
-        }
+        widgets = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -695,7 +817,17 @@ class RecruiterProfileForm(forms.ModelForm):
                 if not picture.name.lower().endswith(('.png', '.jpg', '.jpeg')):
                     raise ValidationError("Invalid image file type")
 
-
+                try:
+                    # Use the reusable compression function
+                    compressed_logo = compress_image(
+                        picture,
+                        max_size=(500, 500),
+                        quality=85,
+                        output_format='JPEG'  # or 'PNG' if you prefer
+                    )
+                    return compressed_logo
+                except ValueError as e:
+                    raise forms.ValidationError("Failed to upload image")
 
         return picture
 

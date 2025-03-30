@@ -8,6 +8,7 @@ import requests
 from dal import autocomplete
 from django.contrib.auth import login, get_user_model, logout
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
 from django.db import connections
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -16,9 +17,9 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from job_portal import settings
-from .forms import CompanyProfileForm, RecruiterProfileForm, UpdateStatusForm, RecruiterSettingsForm
+from .forms import OrganizationProfileForm, RecruiterProfileForm, UpdateStatusForm, RecruiterSettingsForm
 from .forms import JobPostingForm
-from .models import JobPosting, CompanyProfile, JobApplication, RecruiterProfile, Department, JobIndustry, Role, Skills, \
+from .models import JobPosting, OrganizationProfile, JobApplication, RecruiterProfile, Department, JobIndustry, Role, Skills, \
     RecruiterSettings, Plan, SalaryMarket
 
 
@@ -427,8 +428,8 @@ def add_new_job_listing(request):
 
     # Check if the user has a company profile
     try:
-        company_profile = CompanyProfile.objects.get(user=request.user.profile)  # Use test_user_id here
-    except CompanyProfile.DoesNotExist:
+        company_profile = OrganizationProfile.objects.get(user=request.user.profile)  # Use test_user_id here
+    except OrganizationProfile.DoesNotExist:
         company_profile = None
     # Validate if the company profile is complete
     company_profile_complete = True
@@ -479,11 +480,19 @@ def add_new_job_listing(request):
                    'salary_markers': salary_markers,
                    'can_post_job': company_profile_complete and recruiter_profile_complete})
 
-
 def all_job_listings(request):
     # Query the database to get all job postings
-    job_postings = JobPosting.objects.filter(posted_by=request.user.profile)
-    return render(request, 'job_portal/all_listings.html', {'job_postings': job_postings})
+    job_postings = JobPosting.objects.filter(posted_by=request.user.profile).order_by('-posted_at')
+
+    # Add pagination
+    paginator = Paginator(job_postings, settings.ALL_JOBS_PAGINATION_PER_PAGE)  # Typically 10-20 items per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'job_portal/all_listings.html', {
+        'page_obj': page_obj,  # Only pass page_obj, not both job_postings and page_obj
+    })
+
 
 
 def edit_job_listing(request, job_id):
@@ -516,45 +525,57 @@ def delete_listing(request, post_id):
         return JsonResponse({'message': 'Invalid method'}, status=405)
 
 
+from django.core.paginator import Paginator
+from django.conf import settings
+
 def all_listings_with_received_applicants(request):
     # Query to get job postings created by the user, sorted by the latest 'posted_at'
     job_postings = JobPosting.objects.filter(posted_by=request.user.profile) \
         .order_by('-posted_at')
 
+    # Add pagination for job postings
+    paginator = Paginator(job_postings, settings.ALL_JOBS_PAGINATION_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     # Create a list to hold job postings along with their applicants
     job_postings_with_applicants = []
 
     # For each job posting, get the related applicants (using job_id)
-    for job in job_postings:
-        applicants = job.applications.all()
-        num_applicants = applicants.count()  # Count the number of applicants for each job
-        # Calculate the number of extra applicants to display if there are more than 3
+    for job in page_obj:
+        applicants = job.applications.all().order_by('-applied_at')
+        num_applicants = applicants.count()
         extra_applicants = num_applicants - 3 if num_applicants > 3 else 0
 
-        # Create a dictionary for each job with its details, applicants, and applicant count
         job_postings_with_applicants.append({
             'job': job,
-            'applicants': applicants,
-            'num_applicants': num_applicants,  # Add the applicant count
+            'applicants': applicants[:3],  # Only get first 3 for display
+            'num_applicants': num_applicants,
             'extra_applicants': extra_applicants
+        })
 
-        })  # Add the job and applicants data to the list
-
-    # Pass the list of job postings with their applicants to the template
     return render(request, 'job_portal/all_listings_with_applicants.html', {
-        'job_postings_with_applicants': job_postings_with_applicants,  # Pass the combined data
+        'job_postings_with_applicants': job_postings_with_applicants,
+        'page_obj': page_obj,  # Pass pagination object to template
     })
 
 
 def job_listing_applicants(request, job_id):
     # Get the job posting by ID
     job_posting = get_object_or_404(JobPosting, pk=job_id)
+
     # Query the JobApplication model to get all applications for this job
-    applicants = job_posting.applications.all()
-    # Pass the job and applicants to the template
+    applicants = job_posting.applications.all().order_by('-applied_at')
+
+    # Add pagination for applicants
+    paginator = Paginator(applicants, settings.ALL_JOBS_PAGINATION_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'job_portal/job_listing_applicants.html', {
         'job': job_posting,
-        'applicants': applicants
+        'applicants': page_obj,  # Pass paginated applicants
+        'page_obj': page_obj  # Pass pagination object to template
     })
 
 
@@ -609,12 +630,29 @@ def manage_applicant(request, job_id, applicant_id):
     })
 
 
+from django.shortcuts import get_object_or_404, redirect, render
+from .forms import UpdateStatusForm
+from .models import JobPosting, JobApplication
+
 def manage_applicant_update_status(request, job_id, applicant_id):
+    # Define your status workflow with order
+    status_workflow = [
+        {'id': 'applied', 'name': 'Applied', 'order': 1},
+        {'id': 'viewed', 'name': 'Viewed', 'order': 2},
+        {'id': 'interview', 'name': 'Interview', 'order': 3},
+        {'id': 'offer', 'name': 'Offer', 'order': 4},
+        {'id': 'hired', 'name': 'Hired', 'order': 5}
+    ]
+
     # Get the job posting by ID
     job_posting = get_object_or_404(JobPosting, pk=job_id)
 
     # Get the applicant's job application
     applicant = get_object_or_404(JobApplication, user_id=applicant_id, job_listing=job_posting)
+
+    # Get the current status order of the applicant
+    current_status = applicant.status
+    current_status_order = next((status['order'] for status in status_workflow if status['id'] == current_status), None)
 
     # Only process the form for POST request
     if request.method == 'POST':
@@ -622,12 +660,19 @@ def manage_applicant_update_status(request, job_id, applicant_id):
 
         if form.is_valid():
             new_status = form.cleaned_data['status']
+            new_status_order = next((status['order'] for status in status_workflow if status['id'] == new_status), None)
+
+            # Ensure the new status is moving forward (not backward)
+            if new_status_order is not None and new_status_order <= current_status_order:
+                return redirect('manage_applicant', job_id=job_posting.id, applicant_id=applicant.id)
+
+            # If the status change is valid, update the status
             applicant.update_status(new_status)
             # Redirect back to the applicant's details or to the applicant list
             return redirect('manage_applicant', job_id=job_posting.id, applicant_id=applicant.id)
         else:
             # If form is not valid, return the form with errors to the template
-            return render(request, 'job_portal/manage_applicant_update_status.html', {
+            return render(request, 'job_portal/manage_applicant.html', {
                 'job': job_posting,
                 'applicant': applicant,
                 'form': form,
@@ -636,6 +681,7 @@ def manage_applicant_update_status(request, job_id, applicant_id):
     else:
         # If GET request, return a 405 Method Not Allowed error (or handle with a redirect)
         return redirect('manage_applicant', job_id=job_posting.id, applicant_id=applicant.id)
+
 
 
 def manage_applicant_reject_applicant(request, job_id, applicant_id):
@@ -669,17 +715,17 @@ def company_profile(request):
     recruiter_profile = user.profile  # This gets the related RecruiterProfile instance
     # Retrieve the company profile for the logged-in user if it exists
     try:
-        company_profile = CompanyProfile.objects.get(user=request.user.profile)
-    except CompanyProfile.DoesNotExist:
+        company_profile = OrganizationProfile.objects.get(user=request.user.profile)
+    except OrganizationProfile.DoesNotExist:
         company_profile = None
 
     if request.method == 'POST':
-        form = CompanyProfileForm(request.POST, request.FILES, instance=company_profile)
+        form = OrganizationProfileForm(request.POST, request.FILES, instance=company_profile)
         if form.is_valid():
             logo = form.cleaned_data.get('logo')
             if not logo:
                 form.add_error('logo', 'Logo is required.')
-                return render(request, 'job_portal/recruiter_company_profile.html', {'form': form})
+                return render(request, 'job_portal/recruiter_organization_profile.html', {'form': form, 'is_recruiter_profile_complete': recruiter_profile.is_profile_complete})
             # Save the form data (this will create or update the company profile)
             company_profile = form.save(commit=False)
             company_profile.user = recruiter_profile  # Ensure the user is assigned
@@ -689,8 +735,8 @@ def company_profile(request):
             return redirect("company_profile")
     else:
         # If it's a GET request, use the existing company profile if available, or an empty form
-        form = CompanyProfileForm(instance=company_profile)
-    return render(request, 'job_portal/recruiter_company_profile.html',
+        form = OrganizationProfileForm(instance=company_profile)
+    return render(request, 'job_portal/recruiter_organization_profile.html',
                   {'form': form, 'is_recruiter_profile_complete': recruiter_profile.is_profile_complete})
 
 

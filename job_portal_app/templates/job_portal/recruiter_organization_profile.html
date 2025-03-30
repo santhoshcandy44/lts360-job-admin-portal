@@ -191,11 +191,12 @@
                         {% if form.logo.help_text %}
                         <p class="mt-1 text-sm text-gray-500">{{ form.logo.help_text }}</p>
                         {% endif %}
-                        {% if form.logo.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.logo.errors.0 }}</p>
-                        {% endif %}
                     </div>
                 </div>
+
+                    {% if form.logo.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.logo.errors.0 }}</p>
+                        {% endif %}
             </div>
 
             <!-- Submit Button -->

@@ -206,7 +206,7 @@ class UserProfile(models.Model):
         return all(required_fields)
 
 
-class CompanyProfile(models.Model):
+class OrganizationProfile(models.Model):
     user = models.ForeignKey('RecruiterProfile', on_delete=models.CASCADE)  # Link to StudentProfile (ForeignKey)
     organization_id = models.PositiveBigIntegerField(unique=True)
     organization_name = models.CharField(max_length=255)
@@ -245,7 +245,7 @@ class CompanyProfile(models.Model):
                         super().save(*args, **kwargs)
                         break
                 except IntegrityError:
-                    if CompanyProfile.objects.filter(
+                    if OrganizationProfile.objects.filter(
                             organization_id=self.organization_id
                     ).exists():  # Confirm real duplicate
                         continue
@@ -342,15 +342,29 @@ class JobPosting(models.Model):
                 raise ValidationError(
                     {"experience_fixed": "Fixed experience should have a value other than the default of 2."})
 
-        # Salary validation: ensure salary_min is not greater than salary_max
-        if self.salary_min > self.salary_max != 0:
-            raise ValidationError(
-                {"salary_min": "Salary minimum cannot be greater than salary maximum.",
-                 "salary_max": "Salary maximum must be greater than salary minimum if specified."}
-            )
+            # Salary validation logic
+        if not self.salary_not_disclosed:
+            # When salary IS disclosed (salary_not_disclosed is False)
+            if self.salary_min is None or self.salary_max is None:
+                raise ValidationError(
+                    "You must either provide both salary range values (minimum and maximum) "
+                    "or check 'Salary Not Disclosed'",
+                    code='incomplete_salary_info'
+                )
 
-        # If salary_not_disclosed is True, set salary_min and salary_max to 0
-        if self.salary_not_disclosed:
+            if self.salary_min > self.salary_max:
+                raise ValidationError(
+                    "Minimum salary cannot be greater than maximum salary",
+                    code='invalid_salary_range'
+                )
+
+            if self.salary_min < 0 or self.salary_max < 0:
+                raise ValidationError(
+                    "Salary values cannot be negative",
+                    code='negative_salary'
+                )
+        else:
+            # When salary is NOT disclosed (salary_not_disclosed is True)
             self.salary_min = 0.00
             self.salary_max = 0.00
 

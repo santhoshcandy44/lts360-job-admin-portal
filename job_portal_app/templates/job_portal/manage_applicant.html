@@ -62,7 +62,7 @@
 
                 <div>
                     <h1 class="text-base font-medium text-gray-900">
-                        {{ applicant.user.first_name }} {{ applicant.user.last_name }} #{{ applicant.user_id }}
+                        {{ applicant.user.first_name }} {{ applicant.user.last_name }} #{{ applicant.id }}
                     </h1>
                     <div class="flex flex-wrap items-center gap-2 mt-1">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -100,9 +100,9 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <!-- Left Column - Applicant Details -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class=" xl:col-span-2 space-y-6">
 
 
             <!-- Modern Horizontal Application Status Tracker -->
@@ -197,11 +197,12 @@
                                     {% for status in available_statuses %}
                                     <option value="{{ status.id }}"
                                             {% if status.id == current_status.id %}selected{% endif %}
-                                            {% if status.name == 'Rejected' %}class="text-red-600"{% endif %}>
+                                            {% if status.name == 'Rejected' %} class="text-red-600"{% endif %} >
                                     {{ status.name }}
                                     </option>
                                     {% endfor %}
                                 </select>
+
                                 <button type="submit"
                                         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap">
                                     Update Status
@@ -360,7 +361,7 @@
 
 
             </div>
-        </div>
+
 
         <!-- Right Column - Actions & Notes -->
 
@@ -397,56 +398,64 @@
 
             {% if not is_rejected %}
 
-            <!-- Rating & Evaluation Card -->
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900">Evaluation</h2>
-                </div>
-                <div class="px-6 py-5 space-y-4">
+<!-- Rating & Evaluation Card -->
+<div class="bg-white shadow rounded-lg overflow-hidden">
+    <!-- Evaluation Title -->
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">Evaluation</h2>
+    </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Skills Match</label>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-green-600 h-2.5 rounded-full"
-                                 style="width: {{ applicant.skills_match|default:" 65
-                            " }}%">
-                        </div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">{{ applicant.skills_match|default:"65" }}% match with job
-                        requirements</p>
-                </div>
-
-                <div class="pt-2">
-
-
-                    <form method="post" action="{% url 'manage_applicant_mark_top_applicant'  job.id applicant.id %}" class="w-full">
-    {% csrf_token %}
-    <input type="hidden" name="is_top" value="{% if applicant.is_top_applicant %}false{% else %}true{% endif %}">
-
-    <button type="submit"
-            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white
-                   {% if applicant.is_top_applicant %}bg-orange-600 hover:bg-orange-700{% else %}bg-green-600 hover:bg-green-700{% endif %}
-                   transition-colors">
-        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clip-rule="evenodd"/>
-        </svg>
-        {% if applicant.is_top_applicant %}
-            Unmark as Top Candidate
-        {% else %}
-            Mark as Top Candidate
-        {% endif %}
-    </button>
-</form>
-
+    <!-- Skills Match Section -->
+    <div class="px-6 py-5 space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Skills Match</label>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-green-600 h-2.5 rounded-full"
+                     style="width: {{ applicant.skills_match|default:65 }}%">
                 </div>
             </div>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">{{ applicant.skills_match|default:"65" }}% match with job requirements</p>
+
+
+    <!-- Mark as Top Applicant Form -->
+    <div class="pt-2">
+        <form method="post" action="{% url 'manage_applicant_mark_top_applicant' job.id applicant.id %}" class="w-full">
+            {% csrf_token %}
+            <input type="hidden" name="is_top" value="{% if applicant.is_top_applicant %}false{% else %}true{% endif %}">
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white
+                           {% if applicant.is_top_applicant %}bg-orange-600 hover:bg-orange-700{% else %}bg-green-600 hover:bg-green-700{% endif %}
+                           transition-colors">
+                <!-- Icon -->
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd"/>
+                </svg>
+
+                <!-- Button Text -->
+                {% if applicant.is_top_applicant %}
+                    Unmark as Top Candidate
+                {% else %}
+                    Mark as Top Candidate
+                {% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
 
              {% endif %}
         </div>
     </div>
+
+          </div>
+        </div>
+
+
 </div>
 {% endblock %}
-
 
