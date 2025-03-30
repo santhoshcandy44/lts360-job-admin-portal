@@ -1,0 +1,83 @@
+{% extends "job_portal/base_site.html" %}
+
+{% block title %}Job Listing Settings | LTS360 Career Listings{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto py-8 px-2">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Recruiter Settings</h1>
+    </div>
+
+
+  <!-- Profile Completion Alert (if incomplete) -->
+    {% if is_recruiter_profile_complete %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                <i class="fas fa-cog mr-2 text-indigo-500"></i>
+                Currency Settings
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Manage your preferred currency for job listings.
+            </p>
+        </div>
+
+        {% if is_recruiter_profile_complete %}
+        <div class="px-4 py-5 sm:p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-4">
+                        <label for="{{ form.currency_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Preferred Currency
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            {{ form.currency_type }}
+                        </div>
+                        {% if form.currency_type.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.currency_type.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-5">
+                    <div class="flex justify-end">
+                        <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {%else%}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-md">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle h-5 w-5 text-yellow-400"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Profile Incomplete</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <p>Please complete your profile to access all features.</p>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'recruiter_profile' %}"
+                       class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Complete Profile
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

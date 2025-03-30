@@ -1,0 +1,138 @@
+{% extends "job_portal/base_site.html" %}
+
+{% block title %}Plans Management | LTS360 Career Listings{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-8 px-4">
+{% if trial_ended %}
+<!-- Trial Expired Container -->
+<div class="bg-white rounded-xl overflow-hidden mb-8 border-l-4 border-red-500">
+  <div class="p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 p-3 rounded-lg bg-red-50 text-red-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Your trial period has ended</h3>
+          <p class="mt-1 text-gray-600">
+            Your access expired on {{ trial_end_date|date:"F j, Y" }}.
+            Upgrade to regain all features.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+  <!-- Current Plan Status -->
+  <div class="bg-white shadow rounded-lg overflow-hidden mb-8 border-l-4
+              {% if is_trial_active %}border-blue-500{% else %}border-gray-300{% endif %}">
+    <div class="p-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">Your Current Plan</h2>
+          <div class="mt-1 flex items-center">
+            <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium
+                        {% if is_trial_active %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+              {% if is_trial_active %}Trial Active{% else %}{{ current_plan.name }}{% endif %}
+            </span>
+            {% if is_trial_active %}
+            <span class="ml-2 text-sm text-gray-500">
+              Ends in {{ trial_end_date|timeuntil }}
+            </span>
+            {% elif trial_ended %}
+            <span class="ml-2 text-sm text-gray-500">
+              Ended {{ trial_end_date|timesince }} ago
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="bg-gray-50 px-3 py-1 rounded-md">
+          <span class="text-sm font-medium text-gray-500">
+            {% if current_plan.is_free %}Free Tier{% else %}Premium Tier{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-4 border-t border-gray-200 pt-4">
+        <h3 class="text-sm font-medium text-gray-900">Plan Features</h3>
+        <ul class="mt-2 space-y-2">
+          {% for feature, value in current_plan.features.items %}
+          <li class="flex items-start">
+            <svg class="h-5 w-5 mr-2 flex-shrink-0
+                      {% if value == 'unlimited' or value == 'advanced' %}text-green-500
+                      {% else %}text-gray-400{% endif %}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="{% if value == 'unlimited' or value == 'advanced' %}M5 13l4 4L19 7
+                       {% else %}M6 18L18 6M6 6l12 12{% endif %}"/>
+            </svg>
+            <span class="text-sm text-gray-700">
+              {{ feature|title }}:
+              <span class="font-medium">{{ value| title }}</span>
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Plans -->
+  <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+    {% if trial_ended %}Regain Premium Features{% else %}Available Plans{% endif %}
+  </h2>
+
+  <div class="grid md:grid-cols-2 gap-8">
+    {% for plan in available_plans %}
+    <div class="bg-white shadow rounded-lg overflow-hidden
+                {% if plan.name == 'Premium' %} border-2 border-indigo-500 {% endif %}
+                hover:shadow-lg transition-shadow duration-300">
+      <div class="p-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">{{ plan.name }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ plan.features.job_postings|title }} job postings</p>
+          </div>
+          {% if plan.name == 'Premium' %}
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            Most Popular
+          </span>
+          {% endif %}
+        </div>
+
+        <div class="mt-4">
+          <p class="text-4xl font-bold text-gray-900">
+            ${{ plan.price }}<span class="text-lg font-medium text-gray-500">/mo</span>
+          </p>
+          {% if trial_ended and plan.name == 'Premium' %}
+          <p class="text-sm text-indigo-600 mt-1">Special offer for expired trial users</p>
+          {% endif %}
+        </div>
+
+        <ul class="mt-6 space-y-3">
+          {% for feature, value in plan.features.items %}
+          <li class="flex items-start">
+            <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ feature|title }}: {{ value|title }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <button class="mt-8 w-full {% if plan.name == 'Premium' %}bg-indigo-600 hover:bg-indigo-700 text-white
+                              {% else %}bg-gray-100 hover:bg-gray-200 text-gray-800{% endif %}
+                              font-medium py-3 px-6 rounded-lg transition-colors duration-300">
+          {% if trial_ended %}Get Premium{% else %}{% if is_trial_active %}Upgrade Now{% else %}Choose Plan{% endif %}{% endif %}
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

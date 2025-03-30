@@ -1,0 +1,1006 @@
+{% extends "job_portal/base_site.html" %}
+
+{% block title %}Edit Job Posting | Lts360 Careers Listings{% endblock %}
+
+
+{% block extra_css %}
+{% load static %}
+<link href="{% static 'job_portal/styles/select2-tailwind.css' %}" rel="stylesheet"/>
+{{ form.media.css }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{{ form.media.js }}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto py-8 px-2">
+
+
+    <!-- Error Messages -->
+    {% if form.errors %}
+    <div class="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+        <div class="flex items-start">
+            <svg class="h-5 w-5 text-red-400 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                 fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <h3 class="text-sm font-medium text-red-800">There were errors with your submission:</h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Edit Job Listing</h1>
+        <p class="text-lg text-gray-600 mb-8">Update in the details below to update your job listing</p>
+    </div>
+
+   <form method="post" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        {% csrf_token %}
+
+
+        <!-- Grid Layout for Form Fields -->
+        <div class="space-y-8">
+            <!-- Job Title -->
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Job Title
+                </label>
+                <div class="relative">
+                    {{ form.title }}
+                </div>
+                {% if form.title.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.title.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Work Type -->
+            <div class="form-group">
+                <label for="{{ form.work_type.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                              clip-rule="evenodd"/>
+                        <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"/>
+                    </svg>
+                    Work Type
+                </label>
+                <div class="relative">
+                    {{ form.work_type }}
+                </div>
+                {% if form.work_type.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.work_type.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Location
+                </label>
+                <div class="relative">
+                    {{ form.location }}
+                </div>
+                {% if form.location.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.location.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Company -->
+            <div class="form-group">
+                <label for="{{ form.company.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Company
+                </label>
+                <div class="relative">
+                    {{ form.company }}
+                </div>
+                {% if form.company.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.company.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Job Description -->
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Job Description
+                </label>
+                <div class="relative">
+                    {{ form.description }}
+                </div>
+                {% if form.description.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.description.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+                    <!-- Experience Type -->
+            <div class="form-group">
+                <label for="{{ form.experience_type.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                    </svg>
+                    Experience Type
+                </label>
+                <div class="relative">
+                    {{ form.experience_type }}
+                </div>
+                {% if form.experience_type.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.experience_type.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+
+
+            <div id="experience-range-container" {% if form.experience_type.value != 'min-max' %}style="display: none;"{% endif %}>
+    <!-- Experience Range -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+            <label for="{{ form.experience_range_min.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                Experience (Min years)
+            </label>
+            <div class="relative">
+                {{ form.experience_range_min }}
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                </div>
+                <div class="mt-2 text-center text-sm font-medium text-blue-600" id="experience-range-min-value">
+                    {{ form.experience_range_min.value }}
+                </div>
+            </div>
+            {% if form.experience_range_min.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.experience_range_min.errors|join:", " }}</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.experience_range_max.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                Experience (Max years)
+            </label>
+            <div class="relative">
+                {{ form.experience_range_max }}
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                </div>
+                <div class="mt-2 text-center text-sm font-medium text-blue-600" id="experience-range-max-value">
+                    {{ form.experience_range_max.value }}
+                </div>
+            </div>
+            {% if form.experience_range_max.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.experience_range_max.errors|join:", " }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="experience-fixed-container" {% if form.experience_type.value != 'fixed' %}style="display: none;"{% endif %}>
+    <div>
+        <label for="{{ form.experience_fixed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+            Total Experience (Max years)
+        </label>
+        <div class="relative">
+            {{ form.experience_fixed }}
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>0</span>
+                <span>25</span>
+                <span>50</span>
+            </div>
+            <div class="mt-2 text-center text-sm font-medium text-blue-600" id="experience-fixed-value">
+                {{ form.experience_fixed.value }}
+            </div>
+        </div>
+        {% if form.experience_fixed.errors %}
+            <div class="mt-2 text-sm text-red-600 flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span>{{ form.experience_fixed.errors|join:", " }}</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+
+            <!-- Salary Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label for="{{ form.salary_min.id_for_label }}"
+                           class="block text-sm font-medium text-gray-700 mb-2">Salary
+                        Range (Min)</label>
+                    <div class="relative">
+                        {{ form.salary_min }}
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>$0</span>
+                            <span>$500K</span>
+                            <span>$1M</span>
+                        </div>
+                        <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-min-value">{{ form.salary_min.value }}
+                        </div>
+                    </div>
+                    {% if form.salary_min.errors %}
+                    <div class="mt-2 text-sm text-red-600 flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                             viewBox="0 0 20 20"
+                             fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        <span>{{ form.salary_min.errors|join:", " }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.salary_max.id_for_label }}"
+                           class="block text-sm font-medium text-gray-700 mb-2">Salary
+                        Range (Max)</label>
+                    <div class="relative">
+                        {{ form.salary_max }}
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>$0</span>
+                            <span>$500K</span>
+                            <span>$1M</span>
+                        </div>
+                        <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-max-value">{{ form.salary_max.value }}
+                        </div>
+                    </div>
+                    {% if form.salary_max.errors %}
+                    <div class="mt-2 text-sm text-red-600 flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                             viewBox="0 0 20 20"
+                             fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        <span>{{ form.salary_max.errors|join:", " }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Salary Not Disclosed -->
+            <div class="form-group flex items-center">
+                <label for="{{ form.salary_not_disclosed.id_for_label }}" class="inline-flex items-center">
+                    {{ form.salary_not_disclosed }}
+                    <span class="ml-2 text-sm font-medium text-gray-700">Salary Not Disclosed</span>
+                </label>
+                {% if form.salary_not_disclosed.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start ml-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.salary_not_disclosed.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+                <!-- Employment Type Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.employment_type.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Employment Type
+                </label>
+                {{ form.employment_type }}
+                {% if form.employment_type.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.employment_type.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Education Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.education.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                    </svg>
+                    Education
+                </label>
+                {{ form.education }}
+                {% if form.education.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.education.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Industry Type Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.industry_type.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Industry Type
+                </label>
+                {{ form.industry_type }}
+                {% if form.industry_type.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.industry_type.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+                  <!-- Department Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.department.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z"/>
+                    </svg>
+                    Department
+                </label>
+                {{ form.department }}
+                {% if form.department.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.department.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Role Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.role.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Role
+                </label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.role.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Must-Have Skills -->
+            <div class="form-group">
+                <label for="{{ form.must_have_skills.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Must-Have Skills
+                </label>
+                <div class="relative">
+                    {{ form.must_have_skills }}
+                </div>
+                {% if form.must_have_skills.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.must_have_skills.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Good-to-Have Skills -->
+            <div class="form-group">
+                <label for="{{ form.good_to_have_skills.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Good-to-Have Skills
+                </label>
+                <div class="relative">
+                    {{ form.good_to_have_skills }}
+                </div>
+                {% if form.good_to_have_skills.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.good_to_have_skills.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+
+            <!-- Vacancies Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.vacancies.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Vacancies
+                </label>
+                {{ form.vacancies }}
+                {% if form.vacancies.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.vacancies.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Highlights Field -->
+            <div class="form-group mb-6">
+                <label for="{{ form.highlights.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    Highlights
+                </label>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for value, label in form.highlights.field.choices %}
+    <div class="relative">
+        <input
+            type="checkbox"
+            name="highlights"
+            value="{{ value }}"
+            id="highlights_{{ value }}"
+            class="hidden peer"
+            {% if value in form.highlights.value %}checked {% endif %}
+        >
+        <label
+            for="highlights_{{ value }}"
+            class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer
+                  hover:border-blue-300 peer-checked:border-blue-400 peer-checked:bg-blue-50/40
+                  transition-all duration-200 group"
+        >
+            <!-- Emoji Icon -->
+            <span class="text-2xl mr-3">
+                {% if value == 'free_food' %} 🍕
+                {% elif value == 'free_room' %} 🏠
+                {% elif value == 'transport' %} 🚌
+                {% elif value == 'bonus' %} 💰
+                {% elif value == 'health' %} 🏥
+                {% elif value == 'training' %} 🎓
+                {% elif value == 'flexible' %} ⏰
+                {% endif %}
+            </span>
+
+            <!-- Label & Description -->
+            <div class="flex-1">
+                <span class="block font-medium text-gray-800">{{ label }}</span>
+                <span class="block text-xs text-gray-500 mt-1">
+                    {% if value == 'free_food' %} Daily meals provided
+                    {% elif value == 'free_room' %} Company housing
+                    {% elif value == 'transport' %} Commute coverage
+                    {% elif value == 'bonus' %} Yearly rewards
+                    {% elif value == 'health' %} Full medical plan
+                    {% elif value == 'training' %} Skill development
+                    {% elif value == 'flexible' %} Choose your schedule
+                    {% endif %}
+                </span>
+            </div>
+
+            <!-- Checkmark (shown when selected) -->
+            <div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+        </label>
+    </div>
+    {% endfor %}
+</div>
+
+                {% if form.highlight.errors %}
+                <div class="mt-2 text-sm text-red-600 flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ form.highlight.errors|join:", " }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Submit Button -->
+            <div class="pt-6">
+                <button type="submit"
+                        class="w-full md:w-auto px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5">
+                    Update Job Listing
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline ml-2" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+
+
+        </div>
+
+    </form>
+
+    <div class="mt-8">
+        <h1 class="text-2xl font-bold text-gray-900">Manage Job Listing</h1>
+
+
+        <!-- Add this at the bottom of your form, before the closing </div> tag -->
+        <div class="bg-red-50 p-6 rounded-lg mt-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-red-700">Delete this job listing permanently</p>
+                    <p class="text-xs text-red-500 mt-1">This action cannot be undone. All applications will be
+                        lost.</p>
+                </div>
+                <button type="button" onclick="showDeleteModal({{ job_posting.id }})"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Delete Listing
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed z-50 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <!-- Modal container -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Job Posting</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">Are you sure you want to delete this job posting? This
+                                    action cannot be undone.</p>
+                                <!-- Error message container -->
+                                <div id="deleteError" class="hidden mt-3 text-sm text-red-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-2 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button id="confirmDeleteBtn" type="button"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm relative">
+                        <span id="deleteBtnText">Delete</span>
+                        <!-- Loading spinner -->
+                        <svg id="deleteSpinner"
+                             class="hidden animate-spin -ml-1 mr-3 h-5 w-5 text-white absolute right-3"
+                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                    <button id="cancelDeleteBtn" type="button"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Core Elements
+    const experienceTypeField = document.getElementById("id_experience_type");
+    const rangeContainer = document.getElementById("experience-range-container");
+    const fixedContainer = document.getElementById("experience-fixed-container");
+
+    // Sliders and Values
+    const minSlider = document.getElementById('id_experience_range_min');
+    const maxSlider = document.getElementById('id_experience_range_max');
+    const fixedSlider = document.getElementById('id_experience_fixed');
+
+    // Display Elements
+    const minValue = document.getElementById('experience-range-min-value');
+    const maxValue = document.getElementById('experience-range-max-value');
+    const fixedValue = document.getElementById('experience-fixed-value');
+
+    function handleExperienceTypeChange() {
+        // Hide all containers first
+        rangeContainer.style.display = 'none';
+        fixedContainer.style.display = 'none';
+
+        // Disable all inputs initially
+        minSlider.disabled = true;
+        maxSlider.disabled = true;
+        fixedSlider.disabled = true;
+
+        switch(experienceTypeField.value) {
+            case 'fresher':
+                // Force set values
+                minSlider.value = 0;
+                maxSlider.value = 1;
+                break;
+
+            case 'min_max':
+                rangeContainer.style.display = 'block';
+                minSlider.disabled = false;
+                maxSlider.disabled = false;
+                // Update displayed values
+                minValue.textContent = minSlider.value;
+                maxValue.textContent = maxSlider.value;
+                break;
+
+            case 'fixed':
+                fixedContainer.style.display = 'block';
+                fixedSlider.disabled = false;
+                fixedValue.textContent = fixedSlider.value + " years";
+                break;
+        }
+    }
+
+    // Range Validation
+    minSlider.addEventListener('input', function() {
+        if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
+            minSlider.value = maxSlider.value;
+        }
+        minValue.textContent = minSlider.value;
+    });
+
+    maxSlider.addEventListener('input', function() {
+        if (parseInt(maxSlider.value) < parseInt(minSlider.value)) {
+            maxSlider.value = minSlider.value;
+        }
+        maxValue.textContent = maxSlider.value;
+    });
+
+    // Fixed Value Display
+    fixedSlider.addEventListener('input', function() {
+        fixedValue.textContent = fixedSlider.value + " years";
+    });
+
+    // Initial Setup
+    experienceTypeField.addEventListener("change", handleExperienceTypeChange);
+    handleExperienceTypeChange(); // Initialize
+
+
+     const salaryMinSlider = document.getElementById('id_salary_min');
+const salaryMaxSlider = document.getElementById('id_salary_max');
+const salaryMinValue = document.getElementById('salary-min-value');
+const salaryMaxValue = document.getElementById('salary-max-value');
+const salaryNotDisclosedCheckbox = document.getElementById('id_salary_not_disclosed');
+
+function toggleSalaryFields() {
+    if (salaryNotDisclosedCheckbox.checked) {
+        salaryMinSlider.disabled = true;
+        salaryMaxSlider.disabled = true;
+        salaryMinValue.textContent = "N/A";
+        salaryMaxValue.textContent = "N/A";
+    } else {
+        salaryMinSlider.disabled = false;
+        salaryMaxSlider.disabled = false;
+        salaryMinValue.textContent = salaryMinSlider.value;
+        salaryMaxValue.textContent = salaryMaxSlider.value;
+    }
+}
+
+salaryNotDisclosedCheckbox.addEventListener('change', toggleSalaryFields);
+
+// Event listener for the min slider
+salaryMinSlider.addEventListener('input', function () {
+    // Ensure that salaryMinSlider is never greater than salaryMaxSlider
+    if (parseInt(salaryMinSlider.value) > parseInt(salaryMaxSlider.value)) {
+        salaryMinSlider.value = salaryMaxSlider.value;  // Adjust min value if it's greater than max value
+    }
+    salaryMinValue.textContent = salaryMinSlider.value;
+});
+
+// Event listener for the max slider
+salaryMaxSlider.addEventListener('input', function () {
+    // Ensure that salaryMaxSlider is never less than salaryMinSlider
+    if (parseInt(salaryMaxSlider.value) < parseInt(salaryMinSlider.value)) {
+        salaryMaxSlider.value = salaryMinSlider.value;  // Adjust max value if it's less than min value
+    }
+    salaryMaxValue.textContent = salaryMaxSlider.value;
+});
+
+toggleSalaryFields(); // Initial state based on checkbox
+
+
+});
+</script>
+
+<script>
+    let postingIdToDelete = null;
+    const deleteModal = document.getElementById('deleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const deleteError = document.getElementById('deleteError');
+    const deleteSpinner = document.getElementById('deleteSpinner');
+    const deleteBtnText = document.getElementById('deleteBtnText');
+
+    function showDeleteModal(postingId) {
+
+        postingIdToDelete = postingId;
+        // Reset any previous error state
+        deleteError.classList.add('hidden');
+        deleteError.textContent = '';
+        // Reset button state
+        deleteSpinner.classList.add('hidden');
+        deleteBtnText.classList.remove('hidden');
+        confirmDeleteBtn.disabled = false;
+        // Show modal
+        deleteModal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+    }
+
+    function showDeleteError(message) {
+        deleteError.textContent = message;
+        deleteError.classList.remove('hidden');
+        // Reset button state
+        deleteSpinner.classList.add('hidden');
+        deleteBtnText.classList.remove('hidden');
+        confirmDeleteBtn.disabled = false;
+    }
+
+    async function deletePosting() {
+        try {
+            // Show loading state
+            deleteSpinner.classList.remove('hidden');
+            deleteBtnText.classList.add('hidden');
+            confirmDeleteBtn.disabled = true;
+            const deleteUrl = `/career-listings/delete/` + postingIdToDelete+'/';
+
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete job posting');
+            }
+
+            // Success - reload the page to reflect the changes
+            window.location.href = "/career-listings/all-job-listings/";  // Redirects to the URL "/new-page/"
+
+            closeDeleteModal();
+
+        } catch (error) {
+            showDeleteError(error.message);
+        }
+    }
+
+    // Event listeners
+    confirmDeleteBtn.addEventListener('click', deletePosting);
+    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+    // Close modal when clicking outside
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+
+</script>
+{% endblock %}

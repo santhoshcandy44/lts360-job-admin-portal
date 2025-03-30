@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static tailwind_tags %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTS360 Career Listing - Find Top Talent</title>
+    {% tailwind_css %}
+    <link rel="stylesheet" href="/static/job_portal/styles/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+            });
+        });
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+
+<!-- Header Section -->
+<header class="sticky top-0 z-50 bg-white py-4 shadow-sm border-b border-gray-200">
+    <div class="container mx-auto flex justify-between items-center px-4 md:px-8">
+        <div class="flex items-center space-x-2">
+            <img src="{% static 'assets/lts360_logo.png' %}" alt="LTS360 Logo" class="h-10 w-10">
+            <h1 class="text-2xl md:text-3xl font-bold">LTS360</h1>
+            <span class="text-2xl md:text-xl font-medium text-gray-700">Career Listing</span>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+            <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Home</a>
+            <a href="#features" class="text-gray-700 hover:text-indigo-600 font-medium">Features</a>
+            <a href="#process" class="text-gray-700 hover:text-indigo-600 font-medium">Process</a>
+            <a href="#contact" class="text-gray-700 hover:text-indigo-600 font-medium">Contact</a>
+        </nav>
+        <div class="flex items-center space-x-4">
+            <a href="career-listings/login" class="hidden md:block text-indigo-600 hover:text-indigo-800 font-medium">Login</a>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700" aria-expanded="false">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+        <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+            <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium py-2">Home</a>
+            <a href="#features" class="text-gray-700 hover:text-indigo-600 font-medium py-2">Features</a>
+            <a href="#process" class="text-gray-700 hover:text-indigo-600 font-medium py-2">Process</a>
+            <a href="#contact" class="text-gray-700 hover:text-indigo-600 font-medium py-2">Contact</a>
+            <a href="career-listings/login" class="text-indigo-600 hover:text-indigo-800 font-medium py-2">Login</a>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="relative bg-white text-gray-800 py-20 md:py-32">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-purple-100 rounded-full -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100 rounded-full -ml-64 -mb-64"></div>
+    </div>
+    <div class="container mx-auto px-4 text-center relative z-10">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Find Your Next <span class="text-indigo-600">Top Talent</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Connect with qualified candidates and streamline your
+            hiring process with our powerful recruitment platform.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="career-listings/login"
+               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg">
+                Post a Job - It's Free <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            <a href="#features"
+               class="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300">
+                Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Logo Cloud Section -->
+<!--<section class="py-12 bg-gray-50 border-y border-gray-200">
+    <div class="container mx-auto px-4">
+        <p class="text-center text-gray-500 mb-8">Trusted by innovative companies worldwide</p>
+        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+            <img src="https://via.placeholder.com/120x40?text=Company+1" alt="Company Logo" class="h-8 opacity-70 hover:opacity-100 transition">
+            <img src="https://via.placeholder.com/120x40?text=Company+2" alt="Company Logo" class="h-8 opacity-70 hover:opacity-100 transition">
+            <img src="https://via.placeholder.com/120x40?text=Company+3" alt="Company Logo" class="h-8 opacity-70 hover:opacity-100 transition">
+            <img src="https://via.placeholder.com/120x40?text=Company+4" alt="Company Logo" class="h-8 opacity-70 hover:opacity-100 transition">
+            <img src="https://via.placeholder.com/120x40?text=Company+5" alt="Company Logo" class="h-8 opacity-70 hover:opacity-100 transition">
+        </div>
+    </div>
+</section>-->
+
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Powerful Hiring Tools <span
+                    class="text-indigo-600">Made Simple</span></h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Everything you need to attract, evaluate, and hire the best talent - all in one intuitive platform.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 bg-indigo-50 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-search-plus text-indigo-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Smart Candidate Search</h3>
+                <p class="text-gray-600 leading-relaxed">Our AI-powered search analyzes skills and experience to surface the most qualified candidates 3x faster.</p>
+                <div class="mt-4">
+                    <span class="inline-block bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full">AI Matching</span>
+                </div>
+            </div>
+
+            <!-- Feature 2 - Updated -->
+            <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+                <div class="w-16 h-16 bg-purple-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-100 transition-colors duration-300">
+                    <i class="fas fa-network-wired text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Multi-Channel Distribution</h3>
+                <p class="text-gray-600 leading-relaxed">One-click posting to LinkedIn, Indeed, Glassdoor and 50+ specialized job networks to maximize visibility.</p>
+                <div class="mt-4">
+                    <span class="inline-block bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full">Instant Sync</span>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-chart-pie text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Advanced Analytics</h3>
+                <p class="text-gray-600 leading-relaxed">Real-time dashboards track application rates, source effectiveness, and pipeline metrics.</p>
+                <div class="mt-4">
+                    <span class="inline-block bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">Data Insights</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 bg-indigo-50 border-y border-indigo-100">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="p-6">
+                <div class="text-4xl font-bold mb-2 text-indigo-700">50+</div>
+                <div class="text-lg text-gray-700">Trusted Companies</div>
+            </div>
+            <div class="p-6">
+                <div class="text-4xl font-bold mb-2 text-indigo-700">10K+</div>
+                <div class="text-lg text-gray-700">Active Candidates</div>
+            </div>
+            <div class="p-6">
+                <div class="text-4xl font-bold mb-2 text-indigo-700">85%</div>
+                <div class="text-lg text-gray-700">Faster Hiring</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="process" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Our Simple <span class="text-indigo-600">Hiring Process</span>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Get from job posting to hired in just a few easy
+                steps</p>
+        </div>
+
+        <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+            <!-- Step 1 -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 font-bold text-xl">
+                    1
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Create Job Listing</h3>
+                <p class="text-gray-600">Fill out our simple form with job details and requirements.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 font-bold text-xl">
+                    2
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Review Candidates</h3>
+                <p class="text-gray-600">Our smart filters help you quickly identify top applicants.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 font-bold text-xl">
+                    3
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Hire the Best</h3>
+                <p class="text-gray-600">Schedule interviews and make your hiring decision.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<!--<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Meet Our <span class="text-indigo-600">Team</span></h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">The experts behind our recruitment platform</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            &lt;!&ndash; Team Member 1 &ndash;&gt;
+            <div class="bg-white p-6 rounded-xl border border-gray-200 text-center hover:shadow-lg transition duration-300">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-32 h-32 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Sarah Johnson</h3>
+                <p class="text-indigo-600 mb-4">Head of Talent Solutions</p>
+                <p class="text-gray-600">10+ years in HR tech, specializing in candidate matching algorithms.</p>
+            </div>
+
+            &lt;!&ndash; Team Member 2 &ndash;&gt;
+            <div class="bg-white p-6 rounded-xl border border-gray-200 text-center hover:shadow-lg transition duration-300">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-32 h-32 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Michael Chen</h3>
+                <p class="text-indigo-600 mb-4">Product Lead</p>
+                <p class="text-gray-600">Builds intuitive interfaces that make complex hiring simple.</p>
+            </div>
+
+            &lt;!&ndash; Team Member 3 &ndash;&gt;
+            <div class="bg-white p-6 rounded-xl border border-gray-200 text-center hover:shadow-lg transition duration-300">
+                <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-32 h-32 rounded-full mx-auto mb-4">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Emma Rodriguez</h3>
+                <p class="text-indigo-600 mb-4">Customer Success</p>
+                <p class="text-gray-600">Ensures our clients get the most from our platform.</p>
+            </div>
+        </div>
+    </div>
+</section>-->
+
+<!-- CTA Section -->
+<section class="py-20 bg-white border-t border-gray-200">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Ready to Transform Your Hiring?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto">Join thousands of companies who've streamlined their recruitment with
+            LTS360 Career Listing.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="career-listings/login"
+               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg">
+                Get Started - Free<i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            <a href="#contact"
+               class="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300">
+                Schedule Demo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl p-8 md:p-12 shadow-sm border border-gray-200">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Get in <span
+                        class="text-indigo-600">Touch</span></h2>
+                <p class="text-xl text-gray-600">Have questions or need support? Our team is here to help.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Contact Information</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-indigo-100 p-3 rounded-lg mr-4">
+                                <i class="fas fa-envelope text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Email Us</h4>
+                                <p class="text-gray-600">careerlistings@lts360.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-indigo-100 p-3 rounded-lg mr-4">
+                                <i class="fas fa-phone-alt text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Call Us</h4>
+                                <p class="text-gray-600">+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <form class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-gray-700 font-medium mb-2">Your Name</label>
+                            <input type="text" id="name"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                            <input type="email" id="email"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                            <textarea id="message" rows="4"
+                                      class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% include 'job_portal/index_footer.html' %}
+
+</body>
+</html>

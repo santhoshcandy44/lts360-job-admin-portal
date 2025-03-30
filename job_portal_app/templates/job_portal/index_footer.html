@@ -1,0 +1,54 @@
+{% load static %}
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <div class="flex items-center space-x-2 mb-4">
+                    <img src="{% static 'assets/lts360_logo.png' %}" alt="LTS360 Logo" class="h-8 w-8">
+                    <h3 class="text-xl font-bold text-gray-800">LTS360 <span
+                            class="font-medium text-gray-600">Career Listings</span></h3>
+                </div>
+                <p class="text-gray-600">The modern recruitment platform for forward-thinking companies.</p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Company</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">About Us</a>
+                    </li>
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Careers</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Blog</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Resources</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Help Center</a>
+                    </li>
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Recruitment
+                        Guides</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Legal</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Privacy
+                        Policy</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-indigo-600 transition duration-300">Terms of
+                        Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-sm text-gray-500">
+                &copy; {% now "Y" %}
+                <a href="https://www.lts360.com"
+                   class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors duration-200"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    LTS360
+                </a>
+                | All rights reserved.
+            </p></div>
+    </div>
+</footer>

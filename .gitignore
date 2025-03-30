@@ -1,0 +1,6 @@
+node_modules
+myenv
+theme/static_src/node_modulesgi
+.idea
+job_portal_app/migrations
+job_portal/settings.py

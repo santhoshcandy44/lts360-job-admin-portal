@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Callback</title>
+</head>
+<body>
+<script>
+    localStorage.setItem('oauth_token', JSON.stringify({
+        type: "oauth_token",
+        id_token: "{{ token_data.id_token }}",
+    }));
+
+    // Close the popup after sending the token
+    window.close();
+</script>
+</body>
+</html>

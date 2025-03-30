@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static tailwind_tags %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | LTS360 Careers</title>
+    {% tailwind_css %}
+    <link rel="stylesheet" href="/static/job_portal/styles/base.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="h-screen bg-gray-50">
+
+<!-- Main Container -->
+<div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- Left Column - Brand Section -->
+    <div class="lg:w-1/2 bg-white flex items-center justify-center p-12">
+        <div class="max-w-lg text-center">
+            <div class="flex justify-center items-center mb-8">
+                <img src="{% static 'assets/lts360_logo.png' %}" alt="LTS360 Logo" class="h-16 w-16 mr-4">
+                <h1 class="text-4xl font-bold text-gray-800">LTS360 <span
+                        class="font-medium text-gray-600">Career Listings</span></h1>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Find Your Next Great Hire</h2>
+            <p class="text-lg text-gray-600 mb-8">Streamline your recruitment process with our powerful hiring
+                platform</p>
+            <div class="flex justify-center space-x-6">
+                <div class="text-gray-700">
+                    <i class="fas fa-users text-2xl mb-2"></i>
+                    <p class="text-sm">Quality Candidates</p>
+                </div>
+                <div class="text-gray-700">
+                    <i class="fas fa-bolt text-2xl mb-2"></i>
+                    <p class="text-sm">Fast Hiring</p>
+                </div>
+                <div class="text-gray-700">
+                    <i class="fas fa-shield-alt text-2xl mb-2"></i>
+                    <p class="text-sm">Secure Platform</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Login Form -->
+    <div class="lg:w-1/2 flex items-center justify-center p-6 bg-gray-50">
+
+        <div class="bg-white p-8 rounded-lg shadow-sm w-full max-w-md border border-gray-200">
+
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">Login with LTS360 Credentials</h2>
+                <p class="text-gray-500 text-sm">Login to manage your career listings</p>
+            </div>
+
+            {% if errors %}
+            <div class="bg-red-50 border border-red-200 text-red-600 p-3 mb-6 rounded-lg text-sm">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <ul>
+                        {% for error in errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form action="/career-listings/login/" method="POST" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- Email Input -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input type="email" id="email" name="email"
+                               class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                               placeholder="your@email.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="password" name="password"
+                               class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                               placeholder="Password" required>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit"
+                        class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-indigo-500">
+                    Log in
+                </button>
+
+
+            </form>
+
+            <form id="google-auth-form" method="POST" action="/career-listings/login/">
+                {% csrf_token %}
+                <input type="hidden" name="id_token" id="id-token-input">
+                <input type="hidden" name="method" id="sign-in-method" value="google">
+            </form>
+
+            <!-- Divider -->
+            <div class="relative mt-6 mb-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">Or sign in with</span>
+                </div>
+            </div>
+
+
+            <!-- Google Sign-In Button -->
+            <div>
+                <button onclick="openGoogleLoginPopup(event)"
+                        class="w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <!-- Official Google SVG from brand guidelines -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         class="w-5 h-5 mr-2"
+                         aria-hidden="true">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                              fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                              fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                              fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                              fill="#EA4335"/>
+                        <path d="M1 1h22v22H1z"
+                              fill="none"/>
+                    </svg>
+                    <span>Sign in with Google</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% include "job_portal/index_footer.html" %}
+
+<script>
+    let authPopup = null;
+
+    function openGoogleLoginPopup() {
+        const url = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+            client_id: "300991981824-m4ovoojo09sklaqcvijandmnndduda0r.apps.googleusercontent.com",
+            redirect_uri: "http://localhost:8000/google-auth-callback/",
+            response_type: "code",
+            scope: "openid email profile",
+        }).toString();
+
+        console.log(url);
+
+        authPopup = window.open(
+            url,
+            "GoogleAuth",
+            "width=500,height=600,left=100,top=100"
+        );
+
+        if (!authPopup) {
+            alert("Popup blocked! Please allow popups for this site.");
+            return;
+        }
+
+        const popupChecker = setInterval(() => {
+            try {
+                if (authPopup.closed) {
+                    clearInterval(popupChecker);
+                    console.log("Popup closed by user");
+                    return;
+                }
+            } catch (e) {}
+        }, 500);
+    }
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'oauth_token') {
+            const tokenData = JSON.parse(event.newValue);
+            const idToken = tokenData && tokenData.id_token;
+            document.getElementById('id-token-input').value = idToken || '';
+            document.getElementById('google-auth-form').submit();
+            localStorage.removeItem('oauth_token');
+        }
+    });
+</script>
+
+</body>
+</html>

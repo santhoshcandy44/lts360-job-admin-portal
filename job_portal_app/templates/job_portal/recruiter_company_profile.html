@@ -1,0 +1,363 @@
+{% extends "job_portal/base_site.html" %}
+
+{% block title %}Company Profile Settings | LTS360 Career Listings{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+{% endblock %}
+
+{% block content %}
+
+
+<div class="max-w-4xl mx-auto py-8 px-2">
+
+
+    {% if is_recruiter_profile_complete %}
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Recruiter Profile</h1>
+        <p class="text-lg text-gray-600 mb-8">These details will be shown on your company profile.</p>
+    </div>
+
+
+    <!-- Error Messages -->
+    {% if form.errors %}
+    <div class="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+        <div class="flex items-start">
+            <svg class="h-5 w-5 text-red-400 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                 fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <h3 class="text-sm font-medium text-red-800">There were errors with your submission:</h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="max-w-4xl p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Organization Name -->
+            <div class="space-y-2">
+                <label for="{{ form.organization_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.organization_name.label }}
+                    {% if form.organization_name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.organization_name }}
+                {% if form.organization_name.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.organization_name.help_text }}</p>
+                {% endif %}
+                {% if form.organization_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.organization_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-2">
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.email.label }}
+                    {% if form.email.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.email }}
+                {% if form.email.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.email.help_text }}</p>
+                {% endif %}
+                {% if form.email.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Organization Address -->
+            <div class="space-y-2">
+                <label for="{{ form.organization_address.id_for_label }}"
+                       class="block text-sm font-medium text-gray-700">
+                    {{ form.organization_address.label }}
+                    {% if form.organization_address.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.organization_address }}
+                {% if form.organization_address.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.organization_address.help_text }}</p>
+                {% endif %}
+                {% if form.organization_address.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.organization_address.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Country -->
+            <div class="space-y-2">
+                <label for="{{ form.country.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.country.label }}
+                    {% if form.country.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.country }}
+                {% if form.country.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.country.help_text }}</p>
+                {% endif %}
+                {% if form.country.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.country.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- State -->
+            <div class="space-y-2">
+                <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.state.label }}
+                    {% if form.state.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.state }}
+                {% if form.state.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.state.help_text }}</p>
+                {% endif %}
+                {% if form.state.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.state.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- City -->
+            <div class="space-y-2">
+                <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.city.label }}
+                    {% if form.city.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.city }}
+                {% if form.city.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.city.help_text }}</p>
+                {% endif %}
+                {% if form.city.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.city.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Postal Code -->
+            <div class="space-y-2">
+                <label for="{{ form.postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.postal_code.label }}
+                    {% if form.postal_code.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.postal_code }}
+                {% if form.postal_code.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.postal_code.help_text }}</p>
+                {% endif %}
+                {% if form.postal_code.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.postal_code.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Logo -->
+            <div class="space-y-4">
+                <label for="{{ form.logo.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.logo.label }}
+                    {% if form.logo.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+
+                <div class="flex items-center">
+                    <!-- Logo Preview Container -->
+                    <div class="mr-6 w-24 h-24 flex-shrink-0">
+                        {% if form.logo.value %}
+
+                        <img src="{{ form.logo.value.url }}" alt="Logo"
+                             class="w-full h-full rounded-lg object-cover border border-gray-200" id="logo-preview">
+
+                        {% else %}
+                        <div id="placeholder-logo"
+                             class="w-full h-full rounded-lg bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                            <span class="text-gray-400 text-xs">No logo</span>
+                        </div>
+                        <img src="" alt="Logo"
+                             class="hidden w-full h-full rounded-lg object-cover border border-gray-200"
+                             id="logo-preview">
+                        {% endif %}
+                    </div>
+
+                    <!-- File Input Section -->
+                    <div class="flex-1">
+                        {{ form.logo }}
+                        {% if form.logo.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.logo.help_text }}</p>
+                        {% endif %}
+                        {% if form.logo.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.logo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit"
+                        class="w-full md:w-auto  px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                    Save Profile
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline ml-2" viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {%else%}
+
+    <!-- Incomplete Profile Card -->
+    <div class="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm mt-10">
+        <div class="flex items-center space-x-4">
+            <div class="shrink-0">
+                <svg class="h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div >
+                <h2 class="text-xl font-bold text-gray-800">Complete Your Recruiter Profile</h2>
+                <p class="text-gray-600 mt-1">Before creating a company profile, please complete your recruiter
+                    information.</p>
+
+                <div class="mt-4">
+                    <a href="{% url 'recruiter_profile' %}">
+                        <button
+                                class="w-full md:w-auto px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                            Complete Profile
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline ml-2" viewBox="0 0 20 20"
+                                 fill="currentColor">
+                                <path fill-rule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {%endif%}
+
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+{% if is_recruiter_profile_complete  %}
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const countrySelect = document.getElementById('id_country');  // Adjust this id based on your form's rendered id
+        const stateSelect = document.getElementById('id_state');      // Adjust this id based on your form's rendered id
+        const logoSelect = document.getElementById('id_logo');      // Adjust this id based on your form's rendered id
+
+
+                      const states = {
+    "IN": [
+        { code: "AP", name: "Andhra Pradesh" },
+        { code: "AR", name: "Arunachal Pradesh" },
+        { code: "AS", name: "Assam" },
+        { code: "BR", name: "Bihar" },
+        { code: "CT", name: "Chhattisgarh" },
+        { code: "GA", name: "Goa" },
+        { code: "GJ", name: "Gujarat" },
+        { code: "HR", name: "Haryana" },
+        { code: "HP", name: "Himachal Pradesh" },
+        { code: "JH", name: "Jharkhand" },
+        { code: "KA", name: "Karnataka" },
+        { code: "KL", name: "Kerala" },
+        { code: "MP", name: "Madhya Pradesh" },
+        { code: "MH", name: "Maharashtra" },
+        { code: "MN", name: "Manipur" },
+        { code: "ML", name: "Meghalaya" },
+        { code: "MZ", name: "Mizoram" },
+        { code: "NL", name: "Nagaland" },
+        { code: "OD", name: "Odisha" },
+        { code: "PB", name: "Punjab" },
+        { code: "RJ", name: "Rajasthan" },
+        { code: "SK", name: "Sikkim" },
+        { code: "TN", name: "Tamil Nadu" },
+        { code: "TG", name: "Telangana" },
+        { code: "TR", name: "Tripura" },
+        { code: "UP", name: "Uttar Pradesh" },
+        { code: "UK", name: "Uttarakhand" },
+        { code: "WB", name: "West Bengal" }
+    ],  // States of India
+    "LK": [
+        { code: "WP", name: "Western Province" },
+        { code: "CP", name: "Central Province" },
+        { code: "EP", name: "Eastern Province" },
+        { code: "NP", name: "Northern Province" },
+        { code: "NW", name: "North Western Province" },
+        { code: "NC", name: "North Central Province" },
+        { code: "SP", name: "Southern Province" },
+        { code: "SG", name: "Sabaragamuwa Province" },
+        { code: "UP", name: "Uva Province" }
+    ]  // Provinces of Sri Lanka
+};
+
+
+        function populateStates(countryCode) {
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            // If the selected country has states, populate the state select box
+            if (countryCode && states[countryCode]) {
+                const selectedStates = states[countryCode];
+                selectedStates.sort();
+
+                selectedStates.forEach(function (state) {
+                    const option = document.createElement('option');
+                    option.value = state.code;
+                    option.textContent = state.name;
+                    stateSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Event listener for when the country is changed
+        countrySelect.addEventListener("change", function () {
+            const selectedCountry = countrySelect.value;
+            populateStates(selectedCountry);
+        });
+
+
+        logoSelect.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const placeholderLogo =  document.getElementById('placeholder-logo');
+                const preview = document.getElementById('logo-preview');
+                preview.classList.remove('hidden');
+                if(placeholderLogo){
+                   placeholderLogo.classList.add('hidden'); // To add a new class
+                }
+                preview.src = e.target.result;  // Set the src to the selected file's data URL
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);  // Convert the image to a Data URL
+            }
+        });
+
+
+    });
+
+</script>
+{% endif %}
+
+{% endblock %}
+
