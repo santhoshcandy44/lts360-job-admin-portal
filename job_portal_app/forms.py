@@ -316,7 +316,7 @@ class JobPostingForm(forms.ModelForm):
         fields = [
             'title', 'experience_type', 'experience_range_min', 'experience_range_max',
             'experience_fixed',
-            'salary_min', 'salary_max', 'salary_not_disclosed', 'work_type', 'location',
+            'salary_min', 'salary_max', 'salary_not_disclosed', 'work_mode', 'location',
             'must_have_skills', 'good_to_have_skills', 'description', 'highlights',
             'industry_type', 'department', 'role', 'employment_type', 'education',
             'company', 'vacancies'
@@ -327,9 +327,9 @@ class JobPostingForm(forms.ModelForm):
                 'placeholder': 'e.g. Senior Software Engineer',
                 'id': 'id_title'
             }),
-            'work_type': forms.Select(attrs={
+            'work_mode': forms.Select(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'id': 'id_work_type'
+                'id': 'id_work_mode'
             }),
             'location': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',

@@ -4,6 +4,7 @@
 
 
 {% block extra_css %}
+
 {% load static %}
 <link href="{% static 'job_portal/styles/select2-tailwind.css' %}" rel="stylesheet"/>
 {{ form.media.css }}
@@ -87,9 +88,9 @@
                 {% endif %}
             </div>
 
-            <!-- Work Type -->
+            <!-- Work Mode -->
             <div class="form-group">
-                <label for="{{ form.work_type.id_for_label }}"
+                <label for="{{ form.work_mode.id_for_label }}"
                        class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20"
                          fill="currentColor">
@@ -98,10 +99,10 @@
                               clip-rule="evenodd"/>
                         <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"/>
                     </svg>
-                    Work Type
+                    Work Mode
                 </label>
                 <div class="relative">
-                    {{ form.work_type }}
+                    {{ form.work_mode }}
                 </div>
                 {% if form.work_type.errors %}
                 <div class="mt-2 text-sm text-red-600 flex items-start">
@@ -112,7 +113,7 @@
                               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                               clip-rule="evenodd"/>
                     </svg>
-                    <span>{{ form.work_type.errors|join:", " }}</span>
+                    <span>{{ form.work_mode.errors|join:", " }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -904,7 +905,8 @@ salaryNotDisclosedCheckbox.addEventListener('change', toggleSalaryFields);
 salaryMinSlider.addEventListener('input', function () {
     // Ensure that salaryMinSlider is never greater than salaryMaxSlider
     if (parseInt(salaryMinSlider.value) > parseInt(salaryMaxSlider.value)) {
-        salaryMinSlider.value = salaryMaxSlider.value;  // Adjust min value if it's greater than max value
+        salaryMaxSlider.value = salaryMinSlider.value;  // Adjust min value if it's greater than max value
+        salaryMaxValue.textContent = salaryMaxSlider.value;
     }
     salaryMinValue.textContent = salaryMinSlider.value;
 });
@@ -913,7 +915,8 @@ salaryMinSlider.addEventListener('input', function () {
 salaryMaxSlider.addEventListener('input', function () {
     // Ensure that salaryMaxSlider is never less than salaryMinSlider
     if (parseInt(salaryMaxSlider.value) < parseInt(salaryMinSlider.value)) {
-        salaryMaxSlider.value = salaryMinSlider.value;  // Adjust max value if it's less than min value
+        salaryMinSlider.value = salaryMaxSlider.value;  // Adjust max value if it's less than min value
+        salaryMinValue.textContent = salaryMinSlider.value;
     }
     salaryMaxValue.textContent = salaryMaxSlider.value;
 });

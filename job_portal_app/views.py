@@ -269,7 +269,7 @@ def login_view(request):
 
 def dashboard(request):
     # Get duration filter (default to 1 days)
-    duration = request.GET.get('duration', '1')
+    duration = request.GET.get('duration', '7')
 
     # Calculate date range
     end_date = timezone.now().date()
@@ -480,19 +480,63 @@ def add_new_job_listing(request):
                    'salary_markers': salary_markers,
                    'can_post_job': company_profile_complete and recruiter_profile_complete})
 
-def all_job_listings(request):
-    # Query the database to get all job postings
-    job_postings = JobPosting.objects.filter(posted_by=request.user.profile).order_by('-posted_at')
 
-    # Add pagination
-    paginator = Paginator(job_postings, settings.ALL_JOBS_PAGINATION_PER_PAGE)  # Typically 10-20 items per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+def all_job_listings(request):
+    # Start with base queryset
+    queryset = JobPosting.objects.filter(posted_by=request.user.profile)
+
+    # Apply experience filter if provided
+    experience_filter = request.GET.get('experience')
+    if experience_filter:
+        if experience_filter == "Entry Level":
+            queryset = queryset.filter(
+                Q(experience_range_min__gte=0, experience_range_max__lte=2) |
+                Q(experience_fixed__lte=2)  # Jobs where fixed experience ≤ 2 years
+            )
+        elif experience_filter == "Mid Level":
+            queryset = queryset.filter(
+                Q(experience_range_min__gte=2, experience_range_max__lte=5) |
+                Q(experience_fixed__range=(2, 5))  # Jobs where fixed experience is 2-5 years
+            )
+        elif experience_filter == "Senior Level":
+            queryset = queryset.filter(
+                Q(experience_range_min__gte=5) |
+                Q(experience_fixed__gte=5)  # Jobs where fixed experience ≥ 5 years
+            )
+        elif experience_filter == "Executive":
+            queryset = queryset.filter(
+                Q(experience_range_min__gte=10) |
+                Q(experience_fixed__gte=10)  # Jobs where fixed experience ≥ 10 years
+            )
+
+
+    if 'work_mode' in request.GET:
+        queryset = queryset.filter(work_mode=request.GET['work_mode'])
+
+    if all(k in request.GET for k in ['date_from', 'date_to']):
+        try:
+            date_from = timezone.datetime.strptime(request.GET['date_from'], '%Y-%m-%d').date()
+            date_to = timezone.datetime.strptime(request.GET['date_to'], '%Y-%m-%d').date()
+            queryset = queryset.filter(
+                posted_at__date__range=[date_from, date_to]
+            )
+        except ValueError:
+            pass  # Handle invalid date format
+
+    # Order and paginate
+    queryset = queryset.order_by('-posted_at')
+    paginator = Paginator(queryset, settings.ALL_JOBS_PAGINATION_PER_PAGE)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'job_portal/all_listings.html', {
-        'page_obj': page_obj,  # Only pass page_obj, not both job_postings and page_obj
+        'page_obj': page_obj,
+        'active_filters': {
+            'experience': request.GET.get('experience'),
+            'work_mode': request.GET.get('work_mode'),
+            'date_from': request.GET.get('date_from'),
+            'date_to': request.GET.get('date_to'),
+        }
     })
-
 
 
 def edit_job_listing(request, job_id):

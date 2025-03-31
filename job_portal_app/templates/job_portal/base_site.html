@@ -97,7 +97,7 @@
             Dashboard
         </a>
 
-        <a href="{% url 'list_all_postings' %}"
+        <a href="{% url 'all_job_listings' %}"
            class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/career-listings/all-job-listings/' %}active{% endif %}">
             <i class="fas fa-briefcase mr-3 w-5 text-center"></i>
             Job Listings
@@ -134,7 +134,7 @@
         </a>
 
         <a href="{% url 'recruiter_settings' %}"
-           class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/recruiter/settings/' %}active{% endif %}">
+           class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/career-listings/recruiter-settings/' %}active{% endif %}">
             <i class="fas fa-sliders-h mr-3 w-5 text-center"></i> <!-- Horizontal sliders icon -->
             Recruiter Settings
         </a>

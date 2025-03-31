@@ -32,7 +32,7 @@ urlpatterns = [
     path('career-listings/login/', views.login_view, name='login_view'),
     path('career-listings/dashboard/', views.dashboard, name='dashboard'),
 
-    path('career-listings/all-job-listings/', views.all_job_listings, name='list_all_postings'),
+    path('career-listings/all-job-listings/', views.all_job_listings, name='all_job_listings'),
     path('career-listings/delete/<int:post_id>/', views.delete_listing, name='delete_listing'),
     path('career-listings/add-new-job-listing/', views.add_new_job_listing, name='add_new_job_listing'),
 

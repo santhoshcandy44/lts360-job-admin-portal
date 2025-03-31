@@ -3,6 +3,8 @@
 {% block title %}All Job Listings | LTS360 Career Listings{% endblock %}
 
 {% block extra_css %}
+
+
 {% load static %}
 {% endblock %}
 
@@ -10,7 +12,529 @@
 
 
 <div class="max-w-4xl mx-auto py-8 px-2">
+
+    <div class="mb-6">
+        <!-- Selected Filters Display -->
+        <div class="flex flex-wrap gap-2 mb-4" id="selected-filters-container">
+            <!-- Selected filters will appear here -->
+        </div>
+
+        <!-- Modern Filter Button -->
+        <button id="main-filter-toggle"
+                class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Filter Jobs
+        </button>
+        <!-- Filter Container (Initially Hidden) -->
+        <div class="hidden mt-6" id="all-filters-container">
+            <!-- Experience Filter Section -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Experience Level</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter-type="experience" data-value="Entry Level"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Entry Level (0-2 yrs)
+                    </button>
+                    <button data-filter-type="experience" data-value="Mid Level"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Mid Level (2-5 yrs)
+                    </button>
+                    <button data-filter-type="experience" data-value="Senior Level"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Senior Level (5+ yrs)
+                    </button>
+                    <button data-filter-type="experience" data-value="Executive"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Executive (10+ yrs)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Work Mode Filter Section -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Work Mode</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter-type="workMode" data-value="Office"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Office
+                    </button>
+                    <button data-filter-type="workMode" data-value="Remote"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Remote
+                    </button>
+                    <button data-filter-type="workMode" data-value="Hybrid"
+                            class="filter-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Hybrid
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Filter Section -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Date Posted</h3>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button data-filter-type="date" data-value="today"
+                            class="date-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Today
+                    </button>
+                    <button data-filter-type="date" data-value="yesterday"
+                            class="date-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Yesterday
+                    </button>
+                    <button data-filter-type="date" data-value="last7days"
+                            class="date-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Last 7 Days
+                    </button>
+                    <button data-filter-type="date" data-value="last30days"
+                            class="date-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Last 30 Days
+                    </button>
+                    <button data-filter-type="date" data-value="last90days"
+                            class="date-option px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200">
+                        Last 90 Days
+                    </button>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Custom Date Range</h4>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                            <input type="date" id="date-from"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                            <input type="date" id="date-to" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Action Buttons -->
+            <div class="flex justify-end gap-2">
+                <button id="clear-filters"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                    Clear All
+                </button>
+                <button id="apply-filters"
+                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainFilterToggle = document.getElementById('main-filter-toggle');
+        const allFiltersContainer = document.getElementById('all-filters-container');
+        const selectedFiltersContainer = document.getElementById('selected-filters-container');
+        const filterOptions = document.querySelectorAll('.filter-option');
+        const dateOptions = document.querySelectorAll('.date-option');
+        const dateFrom = document.getElementById('date-from');
+        const dateTo = document.getElementById('date-to');
+        const applyFiltersBtn = document.getElementById('apply-filters');
+        const clearFiltersBtn = document.getElementById('clear-filters');
+
+        let selectedFilters = {
+            experience: null,
+            workMode: null,
+            date: null
+        };
+
+        // Toggle filter container visibility
+        mainFilterToggle.addEventListener('click', function() {
+            allFiltersContainer.classList.toggle('hidden');
+        });
+
+        // Filter option selection
+        filterOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const filterType = this.getAttribute('data-filter-type');
+                const filterValue = this.getAttribute('data-value');
+
+                // Toggle selection
+                if (selectedFilters[filterType] === filterValue) {
+                    selectedFilters[filterType] = null;
+                } else {
+                    selectedFilters[filterType] = filterValue;
+                }
+
+                updateSelectedFiltersDisplay();
+                highlightSelectedOptions();
+            });
+        });
+
+        // Date range quick options
+        dateOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const range = this.getAttribute('data-value');
+
+                // Check if clicking the already selected option
+                if (selectedFilters.date && selectedFilters.date.range === range) {
+                    // Deselect the option
+                    selectedFilters.date = null;
+                    dateFrom.value = '';
+                    dateTo.value = '';
+
+                    // Reset all date options styling
+                    dateOptions.forEach(opt => {
+                        opt.classList.remove('bg-indigo-100', 'text-indigo-800');
+                        opt.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                    });
+                } else {
+                    // Select new option
+                    const dates = getDateRange(range);
+                    dateFrom.value = dates.from;
+                    dateTo.value = dates.to;
+                    selectedFilters.date = {
+                        range: range,
+                        from: dates.from,
+                        to: dates.to,
+                        display: getDateRangeDisplay(range)
+                    };
+
+                    // Highlight selected option and clear others
+                    dateOptions.forEach(opt => {
+                        if (opt.getAttribute('data-value') === range) {
+                            opt.classList.add('bg-indigo-100', 'text-indigo-800');
+                            opt.classList.remove('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                        } else {
+                            opt.classList.remove('bg-indigo-100', 'text-indigo-800');
+                            opt.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                        }
+                    });
+                }
+
+                updateSelectedFiltersDisplay();
+            });
+        });
+
+        // Date input change handlers
+        dateFrom.addEventListener('change', handleDateInputChange);
+        dateTo.addEventListener('change', handleDateInputChange);
+
+        function handleDateInputChange() {
+            if (dateFrom.value && dateTo.value) {
+                // Clear any selected quick options
+                dateOptions.forEach(opt => {
+                    opt.classList.remove('bg-indigo-100', 'text-indigo-800');
+                    opt.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                });
+
+                selectedFilters.date = {
+                    range: 'custom',
+                    from: dateFrom.value,
+                    to: dateTo.value,
+                    display: formatDateRange(dateFrom.value, dateTo.value)
+                };
+            } else {
+                // If either date is cleared, remove the date filter
+                selectedFilters.date = null;
+                dateOptions.forEach(opt => {
+                    opt.classList.remove('bg-indigo-100', 'text-indigo-800');
+                    opt.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                });
+            }
+
+            updateSelectedFiltersDisplay();
+        }
+
+        // Apply filters
+        applyFiltersBtn.addEventListener('click', function() {
+            // For custom date range
+            if (dateFrom.value && dateTo.value && (!selectedFilters.date || selectedFilters.date.range === 'custom')) {
+                selectedFilters.date = {
+                    range: 'custom',
+                    from: dateFrom.value,
+                    to: dateTo.value,
+                    display: formatDateRange(dateFrom.value, dateTo.value)
+                };
+            } else if (!dateFrom.value || !dateTo.value) {
+                // Clear date filter if dates are incomplete
+                selectedFilters.date = null;
+            }
+
+            updateSelectedFiltersDisplay();
+            applyFiltersToUrl();
+            allFiltersContainer.classList.add('hidden');
+        });
+
+        // Clear all filters
+        clearFiltersBtn.addEventListener('click', function() {
+            selectedFilters = {
+                experience: null,
+                workMode: null,
+                date: null
+            };
+            dateFrom.value = '';
+            dateTo.value = '';
+            updateSelectedFiltersDisplay();
+            highlightSelectedOptions();
+            dateOptions.forEach(opt => opt.classList.remove('bg-indigo-100', 'text-indigo-800'));
+            applyFiltersToUrl();
+        });
+
+        // Update the selected filters display at the top
+        function updateSelectedFiltersDisplay() {
+            selectedFiltersContainer.innerHTML = '';
+
+            // Experience filter
+            if (selectedFilters.experience) {
+                const pill = createFilterPill('experience', selectedFilters.experience);
+                selectedFiltersContainer.appendChild(pill);
+            }
+
+            // Work mode filter
+            if (selectedFilters.workMode) {
+                const pill = createFilterPill('workMode', selectedFilters.workMode);
+                selectedFiltersContainer.appendChild(pill);
+            }
+
+            // Date filter
+            if (selectedFilters.date && selectedFilters.date.from && selectedFilters.date.to) {
+                const displayText = selectedFilters.date.range === 'custom'
+                    ? selectedFilters.date.display
+                    : getDateRangeDisplay(selectedFilters.date.range);
+                const pill = createFilterPill('date', displayText);
+                selectedFiltersContainer.appendChild(pill);
+            }
+        }
+
+        // Create a filter pill element
+        function createFilterPill(type, value) {
+            const pill = document.createElement('div');
+            pill.className = 'flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm';
+            pill.innerHTML = `
+                <span>${value}</span>
+                <button class="ml-2 text-indigo-600 hover:text-indigo-800 remove-filter" data-filter-type="${type}">
+                    &times;
+                </button>
+            `;
+
+            // Add remove filter functionality
+            pill.querySelector('.remove-filter').addEventListener('click', function() {
+                const filterType = this.getAttribute('data-filter-type');
+                selectedFilters[filterType] = null;
+
+                // Special handling for date filter
+                if (filterType === 'date') {
+                    dateFrom.value = '';
+                    dateTo.value = '';
+                    dateOptions.forEach(opt => opt.classList.remove('bg-indigo-100', 'text-indigo-800'));
+                }
+
+                updateSelectedFiltersDisplay();
+                highlightSelectedOptions();
+                applyFiltersToUrl();
+            });
+
+            return pill;
+        }
+
+        // Highlight selected options
+        function highlightSelectedOptions() {
+            filterOptions.forEach(option => {
+                const filterType = option.getAttribute('data-filter-type');
+                const filterValue = option.getAttribute('data-value');
+
+                if (selectedFilters[filterType] === filterValue) {
+                    option.classList.add('bg-indigo-100', 'text-indigo-800');
+                    option.classList.remove('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                } else {
+                    option.classList.remove('bg-indigo-100', 'text-indigo-800');
+                    option.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                }
+            });
+
+            // Highlight date options if applicable
+            if (selectedFilters.date && selectedFilters.date.range !== 'custom') {
+                dateOptions.forEach(opt => {
+                    if (opt.getAttribute('data-value') === selectedFilters.date.range) {
+                        opt.classList.add('bg-indigo-100', 'text-indigo-800');
+                        opt.classList.remove('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                    } else {
+                        opt.classList.remove('bg-indigo-100', 'text-indigo-800');
+                        opt.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                    }
+                });
+            }
+        }
+
+        // Apply filters to URL and reload
+        function applyFiltersToUrl() {
+            const params = new URLSearchParams();
+
+            if (selectedFilters.experience) {
+                params.append('experience', selectedFilters.experience);
+            }
+
+            if (selectedFilters.workMode) {
+                params.append('work_mode', selectedFilters.workMode);
+            }
+
+            if (selectedFilters.date && selectedFilters.date.from && selectedFilters.date.to) {
+                params.append('date_from', selectedFilters.date.from);
+                params.append('date_to', selectedFilters.date.to);
+            }
+
+            // Update URL (will be empty string if no params)
+            if(params.toString()){
+                window.location.search = params.toString();
+            }
+        }
+
+        // Helper functions for date handling
+        function getDateRange(range) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const last7days = new Date(today);
+            last7days.setDate(last7days.getDate() - 6);
+
+            const last30days = new Date(today);
+            last30days.setDate(last30days.getDate() - 29);
+
+            const last90days = new Date(today);
+            last90days.setDate(last90days.getDate() - 89);
+
+            switch(range) {
+                case 'today': return {
+                    from: formatDate(today),
+                    to: formatDate(today)
+                };
+                case 'yesterday': return {
+                    from: formatDate(yesterday),
+                    to: formatDate(yesterday)
+                };
+                case 'last7days': return {
+                    from: formatDate(last7days),
+                    to: formatDate(today)
+                };
+                case 'last30days': return {
+                    from: formatDate(last30days),
+                    to: formatDate(today)
+                };
+                case 'last90days': return {
+                    from: formatDate(last90days),
+                    to: formatDate(today)
+                };
+                default: return { from: '', to: '' };
+            }
+        }
+
+        function getDateRangeDisplay(range) {
+            switch(range) {
+                case 'today': return 'Today';
+                case 'yesterday': return 'Yesterday';
+                case 'last7days': return 'Last 7 Days';
+                case 'last30days': return 'Last 30 Days';
+                case 'last90days': return 'Last 90 Days';
+                default: return 'Custom Range';
+            }
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateRange(from, to) {
+            const fromDate = new Date(from);
+            const toDate = new Date(to);
+            return `${fromDate.toLocaleDateString()} - ${toDate.toLocaleDateString()}`;
+        }
+
+        // Initialize from URL parameters
+        function initFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Experience
+            if (urlParams.has('experience')) {
+                selectedFilters.experience = urlParams.get('experience');
+            }
+
+            // Work mode
+            if (urlParams.has('work_mode')) {
+                selectedFilters.workMode = urlParams.get('work_mode');
+            }
+
+            // Date
+            if (urlParams.has('date_from') && urlParams.has('date_to')) {
+                const from = urlParams.get('date_from');
+                const to = urlParams.get('date_to');
+
+                // Check if it matches a predefined range
+                const range = getActiveDateRange(from, to);
+
+                selectedFilters.date = {
+                    range: range,
+                    from: from,
+                    to: to,
+                    display: range === 'custom'
+                        ? formatDateRange(from, to)
+                        : getDateRangeDisplay(range)
+                };
+
+                // Set date inputs
+                dateFrom.value = from;
+                dateTo.value = to;
+            }
+
+            updateSelectedFiltersDisplay();
+            highlightSelectedOptions();
+        }
+
+        function getActiveDateRange(from, to) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayStr = formatDate(today);
+
+            if (from === todayStr && to === todayStr) return 'today';
+
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = formatDate(yesterday);
+            if (from === yesterdayStr && to === yesterdayStr) return 'yesterday';
+
+            const last7days = new Date(today);
+            last7days.setDate(last7days.getDate() - 6);
+            const last7daysStr = formatDate(last7days);
+            if (from === last7daysStr) return 'last7days';
+
+            const last30days = new Date(today);
+            last30days.setDate(last30days.getDate() - 29);
+            const last30daysStr = formatDate(last30days);
+            if (from === last30daysStr) return 'last30days';
+
+            const last90days = new Date(today);
+            last90days.setDate(last90days.getDate() - 89);
+            const last90daysStr = formatDate(last90days);
+            if (from === last90daysStr) return 'last90days';
+
+            return 'custom';
+        }
+
+        // Initialize from URL on page load
+        initFromUrl();
+    });
+</script>
+
+
     {% if page_obj %}  <!-- Changed from job_postings to page_obj -->
+
 
     {% for posting in page_obj %}  <!-- Changed from job_postings to page_obj -->
 
@@ -112,44 +636,49 @@
     {% endfor %}
 
 
-        <!-- Pagination Controls -->
-        <div class="flex items-center justify-between mt-8">
-            <div class="text-sm text-gray-500">
-                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </div>
+    <!-- Pagination Controls -->
+    <div class="flex items-center justify-between mt-8">
+        <div class="text-sm text-gray-500">
+            Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
 
-            <nav class="flex space-x-2">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1" class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
-                        &laquo; First
-                    </a>
-                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
-                        Previous
-                    </a>
-                {% endif %}
+        <nav class="flex space-x-2">
+            {% if page_obj.has_previous %}
+            <a href="?page=1"
+               class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                &laquo; First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}"
+               class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
 
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <span class="px-3 py-1 border rounded text-sm font-medium border-blue-500 text-white bg-blue-500">
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-1 border rounded text-sm font-medium border-blue-500 text-white bg-blue-500">
                             {{ num }}
                         </span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?page={{ num }}" class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
-                            {{ num }}
-                        </a>
-                    {% endif %}
-                {% endfor %}
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}"
+               class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                {{ num }}
+            </a>
+            {% endif %}
+            {% endfor %}
 
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
-                        Next
-                    </a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
-                        Last &raquo;
-                    </a>
-                {% endif %}
-            </nav>
-        </div>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+               class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                Next
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}"
+               class="px-3 py-1 border rounded text-sm font-medium border-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+                Last &raquo;
+            </a>
+            {% endif %}
+        </nav>
+    </div>
 
 
     <!-- Delete Confirmation Modal -->
@@ -208,6 +737,8 @@
 
     {% else %}
 
+    {% if active_filters and active_filters.values|join:""|length == 0 %}
+
     <!-- Empty state -->
     <div class="min-h-screen flex items-center justify-center -mt-32">
         <div class="p-6 w-full max-w-4xl text-center flex flex-col items-center justify-center">
@@ -215,8 +746,19 @@
             <p class="text-xl text-gray-500">No job listings posted yet. Please check back later.</p>
         </div>
     </div>
+    {%else%}
 
-    {% endif %}
+    <!-- Basic Empty State -->
+    <div class="flex items-center justify-center">
+        <div class="text-center">
+            <img src="/static/assets/empty_listings.svg" alt="No results" class="mx-auto mb-4 w-64">
+            <p class="text-lg text-gray-600">Nothing matched your filters.</p>
+            <p class="text-gray-500 mt-2">Try adjusting your search criteria.</p>
+        </div>
+    </div>
+
+    {%endif%}
+    {%endif%}
 </div>
 
 

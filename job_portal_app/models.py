@@ -257,7 +257,7 @@ class OrganizationProfile(models.Model):
 class JobPosting(models.Model):
     title = models.CharField(max_length=100)
 
-    work_type = models.CharField(max_length=50,
+    work_mode = models.CharField(max_length=50,
                                  choices=[('remote', 'Remote'), ('office', 'Office'), ('hybrid', 'Hybrid')],
                                  default='office', blank=False)
     location = models.CharField(max_length=100)
@@ -272,8 +272,8 @@ class JobPosting(models.Model):
                                                 ('fixed', 'Fixed Experience')],
                                        default='fresher', blank=False)
     experience_range_min = models.IntegerField(default=0)
-    experience_range_max = models.IntegerField(default=5)
-    experience_fixed = models.IntegerField(default=2)
+    experience_range_max = models.IntegerField(default=0)
+    experience_fixed = models.IntegerField(default=0)
 
     salary_min = models.DecimalField(max_digits=10, decimal_places=2)
     salary_max = models.DecimalField(max_digits=10, decimal_places=2)
