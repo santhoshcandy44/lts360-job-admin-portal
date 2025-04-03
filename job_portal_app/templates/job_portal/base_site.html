@@ -66,7 +66,8 @@
             }
         }
     </style>
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+    {% endblock %}
 </head>
 <body class="bg-gray-50">
 
@@ -77,11 +78,10 @@
         <i class="fas fa-bars text-2xl"></i>
     </button>
 
-    <div class="flex items-center ml-4 md:ml-0">
-        <img src="{% static 'assets/lts360_logo.png' %}" alt="Logo" class="h-8 w-8 mr-3">
-        <h1 class="text-xl font-bold text-gray-800">LTS360 <span
-                class="font-medium text-gray-600">Career Listings</span></h1>
-    </div>
+ <a href="/" class="flex items-center ml-4 md:ml-0">  <!-- Replace 'home' with your URL name -->
+  <img src="{% static 'assets/lts360_logo.png' %}" alt="Logo" class="h-8 w-8 mr-3">
+  <h1 class="text-xl font-bold text-gray-800">LTS360 <span class="font-medium text-gray-600">Career Listings</span></h1>
+</a>
 </header>
 
 <!-- Overlay for mobile menu -->
@@ -127,16 +127,17 @@
             Recruiter Profile
         </a>
 
-        <a href="{% url 'account' %}"
-           class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/career-listings/account/' %}active{% endif %}">
-            <i class="fas fa-user-cog mr-3 w-5 text-center"></i>
-            Account
-        </a>
 
         <a href="{% url 'recruiter_settings' %}"
            class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/career-listings/recruiter-settings/' %}active{% endif %}">
             <i class="fas fa-sliders-h mr-3 w-5 text-center"></i> <!-- Horizontal sliders icon -->
             Recruiter Settings
+        </a>
+
+        <a href="{% url 'account' %}"
+           class="sidebar-link flex items-center py-2.5 px-4 font-light {% if request.path == '/career-listings/account/' %}active{% endif %}">
+            <i class="fas fa-user-cog mr-3 w-5 text-center"></i>
+            Account
         </a>
     </nav>
 
@@ -150,7 +151,7 @@
 </div>
 
 <!-- Main Content -->
-<main class="ml-0 md:ml-64 lg:ml-64 mt-16 p-4 md:p-8 bg-gray-50">
+<main class="ml-0 md:ml-64 lg:ml-64 bg-gray-50 mt-16">
     {% block content %}{% endblock %}
 </main>
 
@@ -185,7 +186,9 @@
     });
 </script>
 
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+
+{% endblock %}
 
 </body>
 </html>

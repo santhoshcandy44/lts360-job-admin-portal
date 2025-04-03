@@ -5,13 +5,12 @@ from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator, EmailValidator, \
-    RegexValidator, FileExtensionValidator
-from phonenumber_field.formfields import PhoneNumberField
+from django.core.validators import MaxLengthValidator, EmailValidator, \
+    RegexValidator, FileExtensionValidator, MinLengthValidator
 
-from .models import JobPosting, OrganizationProfile, RecruiterProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
+from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
     JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket
-from .templates.image_utils import compress_image
+from job_portal_app.image_utils import compress_image
 
 HIGHLIGHTS_CHOICES = [
     ('free_food', 'Free Food'),
@@ -25,6 +24,82 @@ HIGHLIGHTS_CHOICES = [
 
 
 class JobPostingForm(forms.ModelForm):
+    title = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'e.g. Senior Software Engineer',
+            'maxlength': '50',
+            'id': 'id_title',
+
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9\s\-\&\.\,]+$',  # You can adjust the allowed characters as per your needs
+                message='Only letters, numbers, spaces, hyphens, ampersands, periods, and commas are allowed.',
+                code='invalid_title'
+            )
+        ],
+        help_text="Maximum 100 characters. Only letters, numbers, spaces, hyphens, ampersands, periods, and commas are allowed.",
+        required=True
+    )
+
+    location = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'e.g. Chennai',
+            'maxlength': '30',
+            'id': 'id_location',
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9\s\-\&\,\.]+$',  # Allow letters, numbers, spaces, hyphens, commas, and periods
+                message='Only letters, numbers, spaces, hyphens, commas, and periods are allowed.',
+                code='invalid_location'
+            )
+        ],
+        help_text="Maximum 100 characters. Only letters, numbers, spaces, hyphens, commas, and periods are allowed.",
+        required=True
+    )
+
+    company = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Your company name',
+            'maxlength': '100',
+            'id': 'id_company'
+        }),
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9\s\-\&\,\.]+$',  # Allow letters, numbers, spaces, hyphens, commas, and periods
+                message='Only letters, numbers, spaces, hyphens, commas, and periods are allowed.',
+                code='invalid_company'
+            )
+        ],
+        help_text="Maximum 100 characters. Only letters, numbers, spaces, hyphens, commas, and periods are allowed.",
+        required=True
+    )
+
+    description = forms.CharField(
+        max_length=2000,
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'Describe the job responsibilities and requirements...',
+            'maxlength': '1000',
+            'id': 'id_description',
+            'oninput': 'autoResize(this)',
+            'style': 'min-height: 8rem; overflow-y: hidden; resize: none;'
+        }),
+        validators=[
+            MinLengthValidator(50),  # Ensure the description is at least 50 characters
+            MaxLengthValidator(1000)  # Ensure the description does not exceed 2000 characters
+        ],
+        help_text="Please provide a detailed description (between 50 and 2000 characters).",
+        required=True
+    )
+
     experience_type = forms.ChoiceField(
         choices=[
             ('fresher', 'Fresher'),
@@ -200,6 +275,7 @@ class JobPostingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if currency_type:
+
             # Fetch the salary market corresponding to the provided currency_type
             try:
                 salary_market = SalaryMarket.objects.get(currency_type=currency_type)
@@ -313,6 +389,7 @@ class JobPostingForm(forms.ModelForm):
 
     class Meta:
         model = JobPosting
+
         fields = [
             'title', 'experience_type', 'experience_range_min', 'experience_range_max',
             'experience_fixed',
@@ -321,31 +398,11 @@ class JobPostingForm(forms.ModelForm):
             'industry_type', 'department', 'role', 'employment_type', 'education',
             'company', 'vacancies'
         ]
+
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'e.g. Senior Software Engineer',
-                'id': 'id_title'
-            }),
             'work_mode': forms.Select(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
                 'id': 'id_work_mode'
-            }),
-            'location': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'e.g. Chennai',
-                'id': 'id_location'
-            }),
-            'company': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'Your company name',
-                'id': 'id_company'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'rows': 8,
-                'placeholder': 'Describe the job responsibilities and requirements...',
-                'id': 'id_description'
             }),
 
             'employment_type': forms.Select(attrs={
@@ -550,7 +607,6 @@ class OrganizationProfileForm(forms.ModelForm):
             'email', 'country', 'city', 'state', 'postal_code', 'logo'
         ]
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Set default value for state based on country
@@ -625,6 +681,7 @@ from django.core.validators import (
 )
 from phonenumber_field.formfields import PhoneNumberField
 from .models import RecruiterProfile
+
 
 class RecruiterProfileForm(forms.ModelForm):
     first_name = forms.CharField(
@@ -830,6 +887,7 @@ class RecruiterProfileForm(forms.ModelForm):
                     raise forms.ValidationError("Failed to upload image")
 
         return picture
+
 
 class RecruiterSettingsForm(forms.ModelForm):
     class Meta:

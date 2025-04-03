@@ -1,27 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-{% load static tailwind_tags %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LTS360 Career Listing - Find Top Talent</title>
-    {% tailwind_css %}
-    <link rel="stylesheet" href="/static/job_portal/styles/base.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
+{% extends "core/root.html" %}
+{% load static %}
+{% block title %}LTS360 Career Listings - Find Top Talent{% endblock %}
 
-            mobileMenuButton.addEventListener('click', function() {
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                this.setAttribute('aria-expanded', !isExpanded);
-                mobileMenu.classList.toggle('hidden');
-            });
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
         });
-    </script>
-</head>
-<body class="font-sans bg-gray-50">
+    });
+</script>
+{% endblock %}
+
+{% block content %}
 
 <!-- Header Section -->
 <header class="sticky top-0 z-50 bg-white py-4 shadow-sm border-b border-gray-200">
@@ -29,7 +25,7 @@
         <div class="flex items-center space-x-2">
             <img src="{% static 'assets/lts360_logo.png' %}" alt="LTS360 Logo" class="h-10 w-10">
             <h1 class="text-2xl md:text-3xl font-bold">LTS360</h1>
-            <span class="text-2xl md:text-xl font-medium text-gray-700">Career Listing</span>
+            <span class="text-2xl md:text-xl font-medium text-gray-700">Career Listings</span>
         </div>
         <nav class="hidden md:flex space-x-8">
             <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Home</a>
@@ -102,7 +98,8 @@
         <div class="text-center mb-16">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Powerful Hiring Tools <span
                     class="text-indigo-600">Made Simple</span></h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Everything you need to attract, evaluate, and hire the best talent - all in one intuitive platform.</p>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Everything you need to attract, evaluate, and hire the
+                best talent - all in one intuitive platform.</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
@@ -112,21 +109,24 @@
                     <i class="fas fa-search-plus text-indigo-600 text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Smart Candidate Search</h3>
-                <p class="text-gray-600 leading-relaxed">Our AI-powered search analyzes skills and experience to surface the most qualified candidates 3x faster.</p>
+                <p class="text-gray-600 leading-relaxed">Our AI-powered search analyzes skills and experience to surface
+                    the most qualified candidates 3x faster.</p>
                 <div class="mt-4">
                     <span class="inline-block bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full">AI Matching</span>
                 </div>
             </div>
 
-            <!-- Feature 2 - Updated -->
+            <!-- Feature 2 -->
+
             <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-                <div class="w-16 h-16 bg-purple-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-100 transition-colors duration-300">
-                    <i class="fas fa-network-wired text-purple-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-teal-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors duration-300">
+                    <i class="fas fa-users-line text-teal-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-3">Multi-Channel Distribution</h3>
-                <p class="text-gray-600 leading-relaxed">One-click posting to LinkedIn, Indeed, Glassdoor and 50+ specialized job networks to maximize visibility.</p>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Diversity Insights</h3>
+                <p class="text-gray-600 leading-relaxed">Track and improve team diversity with anonymized candidate
+                    demographics and pipeline analytics.</p>
                 <div class="mt-4">
-                    <span class="inline-block bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full">Instant Sync</span>
+                    <span class="inline-block bg-teal-50 text-teal-700 text-sm px-3 py-1 rounded-full">Inclusion</span>
                 </div>
             </div>
 
@@ -136,7 +136,8 @@
                     <i class="fas fa-chart-pie text-blue-600 text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Advanced Analytics</h3>
-                <p class="text-gray-600 leading-relaxed">Real-time dashboards track application rates, source effectiveness, and pipeline metrics.</p>
+                <p class="text-gray-600 leading-relaxed">Real-time dashboards track application rates, source
+                    effectiveness, and pipeline metrics.</p>
                 <div class="mt-4">
                     <span class="inline-block bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">Data Insights</span>
                 </div>
@@ -324,8 +325,80 @@
     </div>
 </section>
 
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
+
+        <!-- FAQ 1 - Signup -->
+        <div class="mb-6 border-b border-gray-200 pb-6">
+            <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(1)">
+                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How can a recruiter sign up
+                    for LTS360 Career Listings?</h3>
+                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
+                   id="faq-icon-1"></i>
+            </button>
+            <p class="mt-3 text-gray-600 hidden" id="faq-answer-1">
+                Recruiters can sign up in 2 minutes: Click "Get Started" on our homepage, verify your LTS360 account,
+                and complete your company profile. No credit card required for the free tier.
+            </p>
+        </div>
+
+        <!-- FAQ 2 - AI Matching -->
+        <div class="mb-6 border-b border-gray-200 pb-6">
+            <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(2)">
+                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How does the AI candidate
+                    matching work?</h3>
+                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
+                   id="faq-icon-2"></i>
+            </button>
+            <p class="mt-3 text-gray-600 hidden" id="faq-answer-2">
+                Our AI analyzes 20+ factors including skills, experience, project history, and even GitHub activity (for
+                tech roles) to rank candidates. You can adjust matching priorities in your dashboard.
+            </p>
+        </div>
+
+        <!-- FAQ 3 - Security -->
+        <div class="mb-6 border-b border-gray-200 pb-6">
+            <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(3)">
+                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How secure is recruiter
+                    account?</h3>
+                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
+                   id="faq-icon-3"></i>
+            </button>
+            <p class="mt-3 text-gray-600 hidden" id="faq-answer-3">
+                We implement industry-leading security measures to ensure your data remains protected. Your candidates'
+                information stays confidential and is never shared without consent. </p>
+        </div>
+
+        <!-- FAQ 4 - Finding Candidates -->
+        <div class="mb-6 border-b border-gray-200 pb-6">
+            <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(4)">
+                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How can find the right
+                    candidates using LTS360 Career Listings?</h3>
+                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
+                   id="faq-icon-4"></i>
+            </button>
+            <p class="mt-3 text-gray-600 hidden" id="faq-answer-4">
+                Use our <span class="font-medium">Smart Search</span> to filter by skills, location, or experience
+                level.
+            </p>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleFAQ(id) {
+      const answer = document.getElementById(`faq-answer-${id}`);
+      const icon = document.getElementById(`faq-icon-${id}`);
+      answer.classList.toggle('hidden');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
+    }
+</script>
+
 
 {% include 'job_portal/index_footer.html' %}
 
-</body>
-</html>
+{% endblock %}
+
+

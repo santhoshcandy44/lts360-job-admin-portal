@@ -5,16 +5,37 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect, QueryDict
-from django.urls import reverse
+from django.urls import reverse, get_resolver, URLPattern, URLResolver
 from django.utils.deprecation import MiddlewareMixin
 
+# Get the URL resolver
+url_resolver = get_resolver()
+
+def get_all_url_paths(url_patterns, parent=''):
+    urls = []
+    for pattern in url_patterns:
+        # If it's an instance of URLPattern, append the full URL path
+        if isinstance(pattern, URLPattern):
+            urls.append(parent + str(pattern.pattern))
+        # If it's an instance of URLResolver (i.e., it includes other URL patterns), recurse into it
+        elif isinstance(pattern, URLResolver):
+            urls.extend(get_all_url_paths(pattern.url_patterns, parent + str(pattern.pattern)))
+    return urls
 
 class TokenValidationMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
+
+        # Map all URL paths into a list
+        all_url_paths = get_all_url_paths(url_resolver.url_patterns)
 
         # Skip authentication for specific paths
         if request.path in [ '/','/admin/',  reverse('login_view'), reverse('logout_view')]:
             return None
+
+        if request.path not in all_url_paths:
+            return  None
+
 
         access_token = request.COOKIES.get('access_token')
         refresh_token = request.COOKIES.get('refresh_token')
@@ -116,7 +137,7 @@ class TokenValidationMiddleware(MiddlewareMixin):
             httponly=True,
             secure=settings.SESSION_COOKIE_SECURE,
             samesite='Strict',
-            max_age=3600  # 1 hour
+            max_age=15 * 60  # 15 minutes in seconds
         )
         response.set_cookie(
             'refresh_token',
@@ -124,7 +145,7 @@ class TokenValidationMiddleware(MiddlewareMixin):
             httponly=True,
             secure=settings.SESSION_COOKIE_SECURE,
             samesite='Strict',
-            max_age=604800  # 1 week
+            max_age=90 * 24 * 60 * 60  # 90 days in seconds
         )
         return response
 
@@ -141,7 +162,7 @@ class TokenValidationMiddleware(MiddlewareMixin):
             'role': role,
             'signUpMethod': sign_up_method,
             'iat': now,  # issued at time
-            'exp': now + timedelta(seconds=10)
+            'exp': now + timedelta(minutes=15)
         }
 
         return jwt.encode(payload, settings.ACCESS_TOKEN_SECRET, algorithm="HS256")
@@ -159,7 +180,7 @@ class TokenValidationMiddleware(MiddlewareMixin):
             'role': role,
             'signUpMethod': "web",
             'iat': now,  # issued at time
-            'exp': now + timedelta(hours=1)
+            'exp': now + timedelta(days=90)
         }
         return jwt.encode(payload, settings.REFRESH_TOKEN_SECRET, algorithm="HS256")
 

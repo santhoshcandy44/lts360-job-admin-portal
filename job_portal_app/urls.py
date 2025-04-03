@@ -25,6 +25,8 @@ from .views import DepartmentAutocomplete, IndustryAutocomplete, RoleAutocomplet
 
 app_name = 'job_portal_app'  # This defines the namespace
 
+handler404 = 'job_portal_app.views.handler404'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),

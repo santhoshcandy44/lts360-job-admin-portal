@@ -1,16 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-{% load static tailwind_tags %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | LTS360 Careers</title>
-    {% tailwind_css %}
-    <link rel="stylesheet" href="/static/job_portal/styles/base.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="h-screen bg-gray-50">
+{% extends "core/root.html" %}
+{% load static %}
+{% block title %}Login | LTS360 Careers{% endblock %}
 
+{% block extra_js %}
+<script>
+    let authPopup = null;
+
+    function openGoogleLoginPopup() {
+        const url = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
+            client_id: "300991981824-m4ovoojo09sklaqcvijandmnndduda0r.apps.googleusercontent.com",
+            redirect_uri: "http://localhost:8000/google-auth-callback/",
+            response_type: "code",
+            scope: "openid email profile",
+        }).toString();
+
+        console.log(url);
+
+        authPopup = window.open(
+            url,
+            "GoogleAuth",
+            "width=500,height=600,left=100,top=100"
+        );
+
+        if (!authPopup) {
+            alert("Popup blocked! Please allow popups for this site.");
+            return;
+        }
+
+        const popupChecker = setInterval(() => {
+            try {
+                if (authPopup.closed) {
+                    clearInterval(popupChecker);
+                    console.log("Popup closed by user");
+                    return;
+                }
+            } catch (e) {}
+        }, 500);
+    }
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'oauth_token') {
+            const tokenData = JSON.parse(event.newValue);
+            const idToken = tokenData && tokenData.id_token;
+            document.getElementById('id-token-input').value = idToken || '';
+            document.getElementById('google-auth-form').submit();
+            localStorage.removeItem('oauth_token');
+        }
+    });
+</script>
+
+{% endblock %}
+
+{% block content %}
 <!-- Main Container -->
 <div class="min-h-screen flex flex-col lg:flex-row">
 
@@ -149,53 +190,7 @@
     </div>
 </div>
 
-{% include "job_portal/index_footer.html" %}
+{% include 'job_portal/index_footer.html' %}
 
-<script>
-    let authPopup = null;
+{% endblock %}
 
-    function openGoogleLoginPopup() {
-        const url = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
-            client_id: "300991981824-m4ovoojo09sklaqcvijandmnndduda0r.apps.googleusercontent.com",
-            redirect_uri: "http://localhost:8000/google-auth-callback/",
-            response_type: "code",
-            scope: "openid email profile",
-        }).toString();
-
-        console.log(url);
-
-        authPopup = window.open(
-            url,
-            "GoogleAuth",
-            "width=500,height=600,left=100,top=100"
-        );
-
-        if (!authPopup) {
-            alert("Popup blocked! Please allow popups for this site.");
-            return;
-        }
-
-        const popupChecker = setInterval(() => {
-            try {
-                if (authPopup.closed) {
-                    clearInterval(popupChecker);
-                    console.log("Popup closed by user");
-                    return;
-                }
-            } catch (e) {}
-        }, 500);
-    }
-
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'oauth_token') {
-            const tokenData = JSON.parse(event.newValue);
-            const idToken = tokenData && tokenData.id_token;
-            document.getElementById('id-token-input').value = idToken || '';
-            document.getElementById('google-auth-form').submit();
-            localStorage.removeItem('oauth_token');
-        }
-    });
-</script>
-
-</body>
-</html>

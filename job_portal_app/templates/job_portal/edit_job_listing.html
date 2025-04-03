@@ -104,7 +104,7 @@
                 <div class="relative">
                     {{ form.work_mode }}
                 </div>
-                {% if form.work_type.errors %}
+                {% if form.work_mode.errors %}
                 <div class="mt-2 text-sm text-red-600 flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
                          viewBox="0 0 20 20"
@@ -321,64 +321,64 @@
 
 
 
-            <!-- Salary Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <label for="{{ form.salary_min.id_for_label }}"
-                           class="block text-sm font-medium text-gray-700 mb-2">Salary
-                        Range (Min)</label>
-                    <div class="relative">
-                        {{ form.salary_min }}
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>$0</span>
-                            <span>$500K</span>
-                            <span>$1M</span>
-                        </div>
-                        <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-min-value">{{ form.salary_min.value }}
-                        </div>
-                    </div>
-                    {% if form.salary_min.errors %}
-                    <div class="mt-2 text-sm text-red-600 flex items-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
-                             viewBox="0 0 20 20"
-                             fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                        <span>{{ form.salary_min.errors|join:", " }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div>
-                    <label for="{{ form.salary_max.id_for_label }}"
-                           class="block text-sm font-medium text-gray-700 mb-2">Salary
-                        Range (Max)</label>
-                    <div class="relative">
-                        {{ form.salary_max }}
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>$0</span>
-                            <span>$500K</span>
-                            <span>$1M</span>
-                        </div>
-                        <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-max-value">{{ form.salary_max.value }}
-                        </div>
-                    </div>
-                    {% if form.salary_max.errors %}
-                    <div class="mt-2 text-sm text-red-600 flex items-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
-                             viewBox="0 0 20 20"
-                             fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                        <span>{{ form.salary_max.errors|join:", " }}</span>
-                    </div>
-                    {% endif %}
-                </div>
+          <!-- Salary Range -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div>
+        <label for="{{ form.salary_min.id_for_label }}"
+               class="block text-sm font-medium text-gray-700 mb-2">Salary Range (Min)</label>
+        <div class="relative">
+            {{ form.salary_min }}
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>{{ currency_symbol }}{{ salary_markers.start|floatformat:"0" }}</span>
+                <span>{{ currency_symbol }}{{ salary_markers.middle|floatformat:"0"|slice:":-3" }}K</span>
+                <span>{{ currency_symbol }}{{ salary_markers.end|floatformat:"0"|slice:":-3" }}M</span>
             </div>
+            <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-min-value">
+                {{ currency_symbol }}{{ form.salary_min.value|default:"0" }}
+            </div>
+        </div>
+        {% if form.salary_min.errors %}
+        <div class="mt-2 text-sm text-red-600 flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                 viewBox="0 0 20 20"
+                 fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <span>{{ form.salary_min.errors|join:", " }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="{{ form.salary_max.id_for_label }}"
+               class="block text-sm font-medium text-gray-700 mb-2">Salary Range (Max)</label>
+        <div class="relative">
+            {{ form.salary_max }}
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>{{ currency_symbol }}{{ salary_markers.start|floatformat:"0" }}</span>
+                <span>{{ currency_symbol }}{{ salary_markers.middle|floatformat:"0"|slice:":-3" }}K</span>
+                <span>{{ currency_symbol }}{{ salary_markers.end|floatformat:"0"|slice:":-3" }}M</span>
+            </div>
+            <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-max-value">
+                {{ currency_symbol }}{{ form.salary_max.value|default:"0" }}
+            </div>
+        </div>
+        {% if form.salary_max.errors %}
+        <div class="mt-2 text-sm text-red-600 flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 mt-0.5 flex-shrink-0"
+                 viewBox="0 0 20 20"
+                 fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <span>{{ form.salary_max.errors|join:", " }}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
             <!-- Salary Not Disclosed -->
             <div class="form-group flex items-center">
@@ -804,7 +804,29 @@
 
 {% block extra_js %}
 <script>
+
+
+    function autoResize(textarea) {
+        textarea.style.height = "auto"; // Reset height
+        textarea.style.height = textarea.scrollHeight + "px"; // Expand dynamically
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+
+    const textarea = document.getElementById("id_description"); // Get textarea by ID
+
+
+    if (textarea) {
+        autoResize(textarea); // Resize initially if it has content
+        textarea.addEventListener("input", function() {
+            autoResize(this);
+        });
+          // Handle window resize
+        window.addEventListener("resize", function () {
+            autoResize(textarea);
+        });
+    }
+
     // Core Elements
     const experienceTypeField = document.getElementById("id_experience_type");
     const rangeContainer = document.getElementById("experience-range-container");
@@ -854,20 +876,25 @@
         }
     }
 
+
     // Range Validation
     minSlider.addEventListener('input', function() {
         if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
-            minSlider.value = maxSlider.value;
+            maxSlider.value = minSlider.value;
+            maxValue.textContent = maxSlider.value;
+
         }
         minValue.textContent = minSlider.value;
     });
 
     maxSlider.addEventListener('input', function() {
         if (parseInt(maxSlider.value) < parseInt(minSlider.value)) {
-            maxSlider.value = minSlider.value;
+            minSlider.value = maxSlider.value;
+            minValue.textContent = minSlider.value;
         }
         maxValue.textContent = maxSlider.value;
     });
+
 
     // Fixed Value Display
     fixedSlider.addEventListener('input', function() {
@@ -922,6 +949,8 @@ salaryMaxSlider.addEventListener('input', function () {
 });
 
 toggleSalaryFields(); // Initial state based on checkbox
+
+
 
 
 });

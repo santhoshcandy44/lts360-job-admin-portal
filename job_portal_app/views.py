@@ -8,18 +8,16 @@ import requests
 from dal import autocomplete
 from django.contrib.auth import login, get_user_model, logout
 from django.core.mail import send_mail
-from django.core.paginator import Paginator
 from django.db import connections
 from django.db.models import Count, Q
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
 from django.utils import timezone
+from tailwind.validate import ValidationError
 
 from job_portal import settings
-from .forms import OrganizationProfileForm, RecruiterProfileForm, UpdateStatusForm, RecruiterSettingsForm
 from .forms import JobPostingForm
-from .models import JobPosting, OrganizationProfile, JobApplication, RecruiterProfile, Department, JobIndustry, Role, Skills, \
+from .forms import OrganizationProfileForm, RecruiterProfileForm, RecruiterSettingsForm
+from .models import OrganizationProfile, RecruiterProfile, Department, JobIndustry, Role, Skills, \
     RecruiterSettings, Plan, SalaryMarket
 
 
@@ -39,7 +37,7 @@ def generate_ar_tokens(user_id, email, role='User', sign_up_method='web'):
         'role': role,
         'signUpMethod': sign_up_method,
         'iat': now,  # issued at time
-        'exp': now + datetime.timedelta(seconds=20)  # expire in 1 hour
+        'exp': now + datetime.timedelta(minutes=15)  # expire in 1 hour
     }
 
     # Create the access token (short-lived)
@@ -53,7 +51,7 @@ def generate_ar_tokens(user_id, email, role='User', sign_up_method='web'):
         'role': role,
         'signUpMethod': sign_up_method,
         'iat': now,  # issued at time
-        'exp': now + datetime.timedelta(hours=1)  # expire in 30 days
+        'exp': now + datetime.timedelta(days=90)  # expire in 30 days
     }
 
     # Create the refresh token (long-lived)
@@ -120,28 +118,32 @@ def login_view(request):
                         user_details = data.get('user_details')
                         user_id = user_details.get('user_id')
                         email = user_details.get('email')
+                        first_name= user_details.get('first_name')
+                        last_name= user_details.get('last_name')
+
 
                         access_token, refresh_token = generate_ar_tokens(user_id, email)
 
                         # Check if the user exists in the Django database using the email
-                        user = get_user_model().objects.filter(email=email).first()
+                        user = get_user_model().objects.filter(external_user_id=user_id).first()
 
                         if not user:
                             # If the user does not exist, create a new user
                             user = get_user_model().objects.create_user(
-                                email=user_details.get('email'),
-                                username=user_details.get('email'),  # Assuming email as the username
-                                first_name=user_details.get('first_name', ''),
-                                last_name=user_details.get('last_name', '') or '',
-                                password=""
+                                external_user_id=user_id,
+                                email='',
+                                username=user_id,  # Assuming email as the username
+                                first_name='',
+                                last_name= '',
+                                password=''
                             )
-                        print("ass")
+
                         # Create or update the UserProfile with external data (user_id)
                         user_profile, created = RecruiterProfile.objects.get_or_create(user=user)
                         user_profile.external_user_id = user_id
-                        user_profile.first_name = user.first_name
-                        user_profile.last_name = user.last_name
-                        user_profile.email = user.email
+                        user_profile.first_name = first_name
+                        user_profile.last_name = last_name
+                        user_profile.email = email
                         user_profile.is_verified = True
                         user_profile.save()
 
@@ -157,7 +159,8 @@ def login_view(request):
                             access_token,
                             httponly=True,  # Prevent JavaScript access to the cookie
                             secure=False,
-                            samesite='Strict'  # Prevent the cookie from being sent cross-site
+                            samesite='Strict',  # Prevent the cookie from being sent cross-site
+                            max_age=15 * 60  # 15 minutes in seconds
                         )
 
                         response.set_cookie(
@@ -165,7 +168,8 @@ def login_view(request):
                             refresh_token,
                             httponly=True,  # Prevent JavaScript access to the cookie
                             secure=False,
-                            samesite='Strict'  # Prevent the cookie from being sent cross-site
+                            samesite='Strict',  # Prevent the cookie from being sent cross-site
+                            max_age=90 * 24 * 60 * 60  # 90 days in seconds
                         )
 
                         # Redirect after setting cookies
@@ -200,31 +204,33 @@ def login_view(request):
                     if api_response.get('isSuccessful'):
                         # Assuming 'data' contains user info
                         data = json.loads(api_response['data'])
-
-                        # Extract required details from the response
-                        user_id = data.get('user_id')
-                        access_token, refresh_token = generate_ar_tokens(user_id, email)
                         user_details = data.get('user_details')
+                        user_id = user_details.get('user_id')
+                        email = user_details.get('email')
+                        first_name = user_details.get('first_name')
+                        last_name = user_details.get('last_name')
+                        access_token, refresh_token = generate_ar_tokens(user_id, email)
 
                         # Check if the user exists in the Django database using the email
-                        user = get_user_model().objects.filter(email=user_details.get('email')).first()
+                        user = get_user_model().objects.filter(external_user_id=user_id).first()
 
                         if not user:
                             # If the user does not exist, create a new user
                             user = get_user_model().objects.create_user(
-                                email=user_details.get('email'),
-                                username=user_details.get('email'),  # Assuming email as the username
-                                first_name=user_details.get('first_name', ''),
-                                last_name=user_details.get('last_name', ''),
-                                password=password  # You can use a dummy password or reset it later
+                                external_user_id=user_id,
+                                email='',
+                                username=user_id,  # Assuming email as the username
+                                first_name='',
+                                last_name='',
+                                password=''
                             )
 
                         # Create or update the UserProfile with external data (user_id)
                         user_profile, created = RecruiterProfile.objects.get_or_create(user=user)
                         user_profile.external_user_id = user_id
-                        user_profile.first_name = user.first_name
-                        user_profile.last_name = user.last_name
-                        user_profile.email = user.email
+                        user_profile.first_name = first_name
+                        user_profile.last_name = last_name
+                        user_profile.email = email
                         user_profile.is_verified = True
                         user_profile.save()
 
@@ -289,10 +295,6 @@ def dashboard(request):
     elif duration == '30':  # Last 30 days
         start_date = end_date - timedelta(days=30)
     elif duration == '90':  # Last 90 days
-        print(duration)
-        start_date = end_date - timedelta(days=90)
-        print(start_date)
-    else:
         start_date = end_date - timedelta(days=int(duration) - 1)  # -1 to include today
 
     # Filter JobPostings by recruiter (user profile) and date range
@@ -527,31 +529,59 @@ def all_job_listings(request):
     queryset = queryset.order_by('-posted_at')
     paginator = Paginator(queryset, settings.ALL_JOBS_PAGINATION_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
+    active_filters = {
+        'experience': request.GET.get('experience'),
+        'work_mode': request.GET.get('work_mode'),
+        'date_from': request.GET.get('date_from'),
+        'date_to': request.GET.get('date_to'),
+    }
 
+    all_none = all(not value for value in active_filters.values())  # True if all are None or ""
     return render(request, 'job_portal/all_listings.html', {
         'page_obj': page_obj,
-        'active_filters': {
-            'experience': request.GET.get('experience'),
-            'work_mode': request.GET.get('work_mode'),
-            'date_from': request.GET.get('date_from'),
-            'date_to': request.GET.get('date_to'),
-        }
+        'active_filters': active_filters,
+        'is_filters_applied': not all_none
     })
 
 
 def edit_job_listing(request, job_id):
     # Fetch the job posting by its ID
+    recruiter_settings_db = RecruiterSettings.objects.get(user=request.user.profile)
+    recruiter_profile_complete = request.user.profile.is_profile_complete()
+    currency_type = recruiter_settings_db.currency_type
+    currency_symbol = recruiter_settings_db.get_currency_symbol
+    salary_market = SalaryMarket.objects.get(currency_type=currency_type)
+
+    salary_markers = {
+        'start': salary_market.salary_start,
+        'middle': salary_market.salary_middle,  # 500K
+        'end': salary_market.salary_end  # 1M
+    }
+
     job_posting = get_object_or_404(JobPosting, pk=job_id)
 
     if request.method == 'POST':
-        form = JobPostingForm(request.POST, instance=job_posting)
+        form = JobPostingForm(request.POST, instance=job_posting, currency_type=currency_type)
         if form.is_valid():
             form.save()
             return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
-    else:
-        form = JobPostingForm(instance=job_posting)  # Pre-populate the form with the existing job data
+        else:
+            # In case of form errors, the form will be re-rendered with error messages
+            return render(request, 'job_portal/add_new_listing.html',
+                          {'form': form,
+                           'job_posting': job_posting,
+                           'recruiter_profile_complete': recruiter_profile_complete,
+                           'currency_symbol': currency_symbol,
+                           'salary_markers': salary_markers})
 
-    return render(request, 'job_portal/edit_job_listing.html', {'form': form, 'job_posting': job_posting})
+    else:
+        form = JobPostingForm(instance=job_posting, currency_type=currency_type)  # Pre-populate the form with the existing job data
+
+    return render(request, 'job_portal/edit_job_listing.html', {'form': form, 'job_posting': job_posting,
+                                                                'recruiter_profile_complete': recruiter_profile_complete,
+                                                                'currency_symbol': currency_symbol,
+                                                                'salary_markers': salary_markers
+                                                                })
 
 
 def delete_listing(request, post_id):
@@ -853,7 +883,6 @@ def account(request):
         return render(request, 'job_portal/account.html', response_data)
 
     except Exception as e:
-        print(e)
         # Catch any database or other exceptions
         return render(request, 'job_portal/account.html')
 
@@ -1030,4 +1059,13 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
                 Q(code__icontains=self.q)  # Search code
             )
         return qs
+
+def handler404(request, exception):
+    context = {
+        'error_title': "Page Not Found",
+        'error_message': "The page you're looking for doesn't exist or has been moved.",
+    }
+    return render(request, 'core/404.html', context, status=404)
+
+
 
