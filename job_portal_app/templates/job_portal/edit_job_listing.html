@@ -6,8 +6,20 @@
 {% block extra_css %}
 
 {% load static %}
+
 <link href="{% static 'job_portal/styles/select2-tailwind.css' %}" rel="stylesheet"/>
 {{ form.media.css }}
+<style>
+input[type="date"] {
+    color: #000000 !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field {
+    color: #000000 !important;
+}
+</style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 {{ form.media.js }}
 
@@ -52,6 +64,137 @@
         <h1 class="text-3xl font-bold text-gray-900">Edit Job Listing</h1>
         <p class="text-lg text-gray-600 mb-8">Update in the details below to update your job listing</p>
     </div>
+
+
+
+    <!-- Modern Job Posting Expiry Status -->
+<div class="space-y-2 px-2 mb-4">
+
+    <div class="flex items-center text-gray-600">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+  </svg>
+  <span class="text-sm font-medium">EXPIRY STATUS</span>
+</div>
+
+  <div class="relative group">
+    <div class="p-4 rounded-xl border transition-all duration-200
+        {% if job_posting.days_remaining <= 0 %}border-red-200 bg-red-50/70
+        {% elif job_posting.days_remaining <= 3 %}border-amber-200 bg-amber-50/70
+        {% elif job_posting.days_remaining <= 7 %}border-blue-200 bg-blue-50/70
+        {% else %}border-emerald-200 bg-emerald-50/70{% endif %}
+        hover:shadow-sm">
+
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="font-semibold text-gray-900">
+            {% if job_posting.expiry_date %}
+              {{ job_posting.expiry_date|date:"F j, Y" }}
+            {% else %}
+              No expiration set
+            {% endif %}
+          </h3>
+          <p class="text-sm mt-1
+              {% if job_posting.days_remaining <= 0 %}text-red-600
+              {% elif job_posting.days_remaining <= 3 %}text-amber-600
+              {% elif job_posting.days_remaining <= 7 %}text-blue-600
+              {% else %}text-emerald-600{% endif %}">
+            {% if job_posting.expiry_date %}
+              {% if job_posting.days_remaining > 0 %}
+                <span class="inline-flex items-center">
+                  <span class="w-2 h-2 mr-2 rounded-full
+                      {% if job_posting.days_remaining <= 3 %}bg-amber-500
+                      {% elif job_posting.days_remaining <= 7 %}bg-blue-500
+                      {% else %}bg-emerald-500{% endif %}"></span>
+                  {{ job_posting.days_remaining }} day{{ job_posting.days_remaining|pluralize }} remaining
+                </span>
+              {% else %}
+                <span class="inline-flex items-center">
+                  <span class="w-2 h-2 mr-2 rounded-full bg-red-500"></span>
+                  Expired {{ job_posting.days_remaining_abs }} day{{ job_posting.days_remaining_abs|pluralize }} ago
+                </span>
+              {% endif %}
+            {% endif %}
+          </p>
+        </div>
+
+
+      </div>
+
+      {% if job_posting.expiry_date and job_posting.days_remaining <= 7 %}
+      <div class="mt-3 pt-3 border-t
+          {% if job_posting.days_remaining <= 0 %}border-red-200
+          {% elif job_posting.days_remaining <= 3 %}border-amber-200
+          {% else %}border-blue-200{% endif %}">
+        <p class="text-xs flex items-center
+            {% if job_posting.days_remaining <= 0 %}text-red-700
+            {% elif job_posting.days_remaining <= 3 %}text-amber-700
+            {% else %}text-blue-700{% endif %}">
+          {% if job_posting.days_remaining <= 0 %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            This position is no longer accepting applications
+          {% elif job_posting.days_remaining <= 3 %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            Applications closing soon
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Actively accepting applications
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Subtle hover effect -->
+    <div class="absolute inset-0 rounded-xl pointer-events-none border-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200
+        {% if job_posting.days_remaining <= 0 %}border-red-300/50
+        {% elif job_posting.days_remaining <= 3 %}border-amber-300/50
+        {% elif job_posting.days_remaining <= 7 %}border-blue-300/50
+        {% else %}border-emerald-300/50{% endif %}"></div>
+  </div>
+</div>
+
+
+      <!-- Warning for 1 day remaining -->
+    {% if job_posting.is_published and job_posting.days_remaining <= 1 %}
+
+    <div class="my-4 mx-2">
+  <div class="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+    <div class="flex">
+      <svg class="flex-shrink-0 h-5 w-5 text-amber-500 mt-0.5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <div>
+
+        <p class="text-xs text-amber-700 mt-1">
+          Extend the deadline to keep accepting applications.
+        </p>
+        <button onclick="openModal()"
+                class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+          <svg class="-ml-0.5 mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Extend Deadline
+        </button>
+      </div>
+    </div>
+  </div>
+
+    </div>
+
+
+
+
+    {% endif %}
+
+
+
 
    <form method="post" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
         {% csrf_token %}
@@ -702,8 +845,16 @@
             </div>
 
 
+
+
+
+            {% if job_posting.is_published %}
+
+
             <!-- Submit Button -->
             <div class="pt-6">
+
+
                 <button type="submit"
                         class="w-full md:w-auto px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5">
                     Update Job Listing
@@ -715,14 +866,50 @@
                     </svg>
                 </button>
             </div>
+            {%endif%}
+
 
 
         </div>
 
     </form>
 
+
     <div class="mt-8">
         <h1 class="text-2xl font-bold text-gray-900">Manage Job Listing</h1>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-gray-700">
+                {% if job_posting.is_published %}
+                    Currently published
+                {% elif job_posting.is_draft %}
+                    Currently in draft
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="flex space-x-3">
+            {% if job_posting.is_published %}
+            <!-- Save as Draft Button -->
+            <a href="{% url 'edit_job_posting_draft_status' job_posting.id %}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+
+                Save as Draft
+            </a>
+            {% elif job_posting.is_draft %}
+            <!-- Publish Button -->
+            <a href="{% url 'edit_job_posting_publish_status' job_posting.id %}"
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+
+                Publish
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
 
         <!-- Add this at the bottom of your form, before the closing </div> tag -->
@@ -798,12 +985,89 @@
     </div>
 
 
+        {% if job_posting.is_published and job_posting.days_remaining <= 1 %}
+
+        <!-- Extend Modal (Pure Tailwind) -->
+<!-- Extend Modal -->
+<div id="extendModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+
+        <!-- Modal panel -->
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+          Extend Job Posting Deadline
+        </h3>
+        <form method="post" action="" id="extend-form">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              New Deadline Date
+            </label>
+
+{% load custom_filters %}
+
+              {% now "Y-m-d" as today %}
+
+<input type="date" name="new_expiry_date"
+       min="{{ today }}"
+       max="{{ today|add_days:30 }}"
+       value="{{ today|add_days:30 }}"
+       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+
+
+
+          </div>
+
+          <div class="flex justify-end space-x-3 mt-6">
+            <button type="button" onclick="closeModal()"
+                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Extend Deadline
+            </button>
+
+          </div>
+
+                <div id="statusMessage" class="mt-4">
+
+             </div>
+
+        </form>
+      </div>
+    </div>
+
+</div>
+    {%endif%}
+
+
+
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
+
+
+    function closeModal() {
+  // Hide the modal
+  document.getElementById('extendModal').classList.add('hidden');
+
+  // Re-enable scrolling
+  document.body.classList.remove('overflow-hidden');
+  document.documentElement.classList.remove('overflow-hidden');
+}
+
+function openModal() {
+  // Show the modal
+  document.getElementById('extendModal').classList.remove('hidden');
+
+  // Disable scrolling
+  document.body.classList.add('overflow-hidden');
+  document.documentElement.classList.add('overflow-hidden');
+}
 
 
     function autoResize(textarea) {
@@ -951,9 +1215,80 @@ salaryMaxSlider.addEventListener('input', function () {
 toggleSalaryFields(); // Initial state based on checkbox
 
 
+    // Function to get CSRF token from cookies
+    function getCSRFToken() {
+        let csrfToken = null;
+        const cookies = document.cookie.split(';');
+        cookies.forEach(cookie => {
+            const cookiePair = cookie.trim().split('=');
+            if (cookiePair[0] === 'csrftoken') {
+                csrfToken = cookiePair[1];
+            }
+        });
+        return csrfToken;
+    }
+
+ const extendForm = document.getElementById('extend-form');
+    const extendModal = document.getElementById('extendModal');
+    const statusMessage = document.getElementById('statusMessage');
+
+    extendForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        fetch("{% url 'publish_listing_extend_expiry_date' job_posting.id %}", {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                 'X-CSRFToken': getCSRFToken(),
+
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+
+                // Show success message
+                statusMessage.innerHTML = `
+                    <div class="text-sm text-green-700">
+                        ${data.message}
+                    </div>
+                `;
+
+            window.location.reload(); // Refresh the page
+
+
+            } else {
+
+               console.log(data.message);
+                // Show error message
+                statusMessage.innerHTML = `
+                    <div class="text-sm text-red-700">
+                        ${data.message}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+                       console.log(error.message);
+
+            statusMessage.innerHTML = `
+                <div class="text-sm text-red-700">
+                    An error occurred. Please try again.
+                </div>
+            `;
+        });
+    });
+
+
+
+
 
 
 });
+
+
+
 </script>
 
 <script>

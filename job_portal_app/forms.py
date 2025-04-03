@@ -1,4 +1,5 @@
 # job_postings/forms.py
+import datetime
 import json
 
 from dal import autocomplete
@@ -7,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import MaxLengthValidator, EmailValidator, \
     RegexValidator, FileExtensionValidator, MinLengthValidator
+from django.forms import SelectDateWidget
 
 from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
     JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket
@@ -270,9 +272,33 @@ class JobPostingForm(forms.ModelForm):
         label="Select Job Perks"
     )
 
+    # Calculate dates
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    max_date = datetime.date.today() + datetime.timedelta(days=30)
+
+    expiry_date = forms.DateField(
+        widget=forms.DateInput(
+            attrs={
+                'type': 'date',
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'min': tomorrow.strftime('%Y-%m-%d'),  # Tomorrow's date
+                'max': max_date.strftime('%Y-%m-%d'),  # 30 days from today
+                'value': max_date.strftime('%Y-%m-%d'),  # Default to max date
+                'id': 'id_expiry_date',
+            }
+        ),
+        required=True,
+        label="Expiry Date (Tomorrow to 30 Days)",
+        input_formats=['%Y-%m-%d'],
+        initial=max_date,  # Backend initial value
+    )
+
     def __init__(self, *args, **kwargs):
         currency_type = kwargs.pop('currency_type', None)
         super().__init__(*args, **kwargs)
+
+        if self.instance:
+            self.fields['expiry_date'].required = False
 
         if currency_type:
 
@@ -378,7 +404,6 @@ class JobPostingForm(forms.ModelForm):
                 self.initial['highlights'] = self.instance.highlights
 
             except (TypeError, json.JSONDecodeError, AttributeError) as e:
-                raise e
                 # Handle invalid or missing data gracefully
                 self.initial['must_have_skills'] = []
                 self.initial['good_to_have_skills'] = []
@@ -386,6 +411,9 @@ class JobPostingForm(forms.ModelForm):
                 self.initial['department'] = None
                 self.initial['industry_type'] = None
                 self.initial['highlights'] = None
+                raise ValidationError("Something went wrong.")
+
+
 
     class Meta:
         model = JobPosting
@@ -396,7 +424,7 @@ class JobPostingForm(forms.ModelForm):
             'salary_min', 'salary_max', 'salary_not_disclosed', 'work_mode', 'location',
             'must_have_skills', 'good_to_have_skills', 'description', 'highlights',
             'industry_type', 'department', 'role', 'employment_type', 'education',
-            'company', 'vacancies'
+            'company', 'vacancies', 'expiry_date'
         ]
 
         widgets = {
@@ -425,6 +453,9 @@ class JobPostingForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+
+        if self.instance.status!='published':
+            raise ValidationError('Job listing is not published to update')
         salary_not_disclosed = cleaned_data.get('salary_not_disclosed')
         salary_min = cleaned_data.get('salary_min')
         salary_max = cleaned_data.get('salary_max')
@@ -459,6 +490,16 @@ class JobPostingForm(forms.ModelForm):
         elif experience_type == 'fixed':
             if experience_fixed is None:
                 raise ValidationError("Please provide fixed experience.")
+
+        expiry_date = cleaned_data.get('expiry_date')
+
+        if expiry_date:
+            if expiry_date < self.tomorrow:
+                self.add_error('expiry_date', "Expiry date must be at least tomorrow.")
+            if expiry_date > self.max_date:
+                self.add_error('expiry_date', "Expiry date cannot be more than 30 days from today.")
+        if self.instance:
+            cleaned_data['expiry_date'] = self.instance.expiry_date
 
         return cleaned_data
 

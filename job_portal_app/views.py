@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+from audioop import reverse
 from datetime import timedelta
 
 import jwt
@@ -12,13 +13,15 @@ from django.db import connections
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.timezone import now
+from django.views.generic import UpdateView
 from tailwind.validate import ValidationError
 
 from job_portal import settings
 from .forms import JobPostingForm
 from .forms import OrganizationProfileForm, RecruiterProfileForm, RecruiterSettingsForm
 from .models import OrganizationProfile, RecruiterProfile, Department, JobIndustry, Role, Skills, \
-    RecruiterSettings, Plan, SalaryMarket
+    RecruiterSettings, Plan, SalaryMarket, JobPosting
 
 
 def index(request):
@@ -567,7 +570,7 @@ def edit_job_listing(request, job_id):
             return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
         else:
             # In case of form errors, the form will be re-rendered with error messages
-            return render(request, 'job_portal/add_new_listing.html',
+            return render(request, 'job_portal/edit_job_listing.html',
                           {'form': form,
                            'job_posting': job_posting,
                            'recruiter_profile_complete': recruiter_profile_complete,
@@ -577,11 +580,93 @@ def edit_job_listing(request, job_id):
     else:
         form = JobPostingForm(instance=job_posting, currency_type=currency_type)  # Pre-populate the form with the existing job data
 
+
     return render(request, 'job_portal/edit_job_listing.html', {'form': form, 'job_posting': job_posting,
                                                                 'recruiter_profile_complete': recruiter_profile_complete,
                                                                 'currency_symbol': currency_symbol,
                                                                 'salary_markers': salary_markers
                                                                 })
+
+
+def draft_listing_status(request, job_id):
+    """Manually update job status to 'draft' and redirect to the same page."""
+    listing = get_object_or_404(JobPosting, id=job_id)
+
+    # Update status to draft
+    listing.status = "draft"
+    listing.save()  # Save the changes
+
+    # Redirect back to the edit page
+    return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
+
+
+def  publish_listing_status(request, job_id):
+    """Manually update job status to 'draft' and redirect to the same page."""
+    listing = get_object_or_404(JobPosting, id=job_id)
+
+    # Update status to draft
+    listing.status = "published"
+    listing.save()  # Save the changes
+
+    # Redirect back to the edit page
+    return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
+
+
+def publish_listing_extend_expiry_date(request, job_id):
+    """Update job expiry date with AJAX handling."""
+    listing = get_object_or_404(JobPosting, id=job_id)
+
+    if request.method == 'POST':
+        new_expiry_date_str = request.POST.get('new_expiry_date')
+
+        try:
+            # Parse the date
+            new_expiry_date = now().date() if not new_expiry_date_str else \
+                now().strptime(new_expiry_date_str, '%Y-%m-%d').date()
+
+            today = now().date()
+            max_date = today + timedelta(days=30)
+
+            # Validate
+            if new_expiry_date == today:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Expiry date cannot be today'
+                }, status=400)
+            if new_expiry_date < today:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Expiry date cannot be in the past'
+                }, status=400)
+
+            elif new_expiry_date > max_date:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Expiry date cannot be more than 30 days from now'
+                }, status=400)
+
+            # Update listing
+            listing.status = "published"
+            listing.expiry_date = new_expiry_date
+            listing.save()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Deadline extended successfully',
+                'new_date': new_expiry_date.strftime('%Y-%m-%d')
+            })
+
+        except ValueError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid date format'
+            }, status=400)
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=405)
+
 
 
 def delete_listing(request, post_id):

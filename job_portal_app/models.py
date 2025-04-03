@@ -1,6 +1,6 @@
 import os
 import random
-from datetime import timedelta
+from datetime import timedelta, date
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
@@ -306,6 +306,20 @@ class JobPosting(models.Model):
     posted_by = models.ForeignKey('RecruiterProfile', on_delete=models.CASCADE, related_name='recruiter_user_profile')
     organization_id = models.BigIntegerField(null=True, blank=True)
 
+    expiry_date = models.DateField()
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('published', 'Published'),
+    ]
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='published'
+    )
+
+
     class Meta:
         db_table = 'lts360_jobs'  # Custom table name
 
@@ -374,6 +388,42 @@ class JobPosting(models.Model):
             # When salary is NOT disclosed (salary_not_disclosed is True)
             self.salary_min = 0.00
             self.salary_max = 0.00
+
+        if self.expiry_date:
+            tomorrow = date.today() + timedelta(days=1)
+            max_date = date.today() + timedelta(days=30)
+
+            if self.expiry_date < tomorrow:
+                raise ValidationError(
+                    {'expiry_date': "Expiry date must be at least tomorrow."}
+                )
+            if self.expiry_date > max_date:
+                raise ValidationError(
+                    {'expiry_date': "Expiry date cannot be more than 30 days from today."}
+                )
+
+    @property
+    def days_remaining(self):
+        if not self.expiry_date:
+            return None
+        return (self.expiry_date - date.today()).days
+
+    @property
+    def days_remaining_abs(self):
+        return abs(self.days_remaining) if self.days_remaining is not None else None
+
+    @property
+    def is_draft(self):
+        """Returns True if the job posting is in draft status"""
+        return self.status == 'draft'
+
+    @property
+    def is_published(self):
+        """Returns True if the job posting is published"""
+        return self.status == 'published'
+
+
+
 
 
 class JobApplication(models.Model):
