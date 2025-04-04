@@ -4,20 +4,18 @@ import json
 import re
 
 import bleach
-from bleach.sanitizer import ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import MaxLengthValidator, EmailValidator, \
     RegexValidator, FileExtensionValidator, MinLengthValidator
-from django.forms import SelectDateWidget
 from html5lib import serialize, parseFragment
 from tinymce.widgets import TinyMCE
 
-from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
-    JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket
 from job_portal_app.image_utils import compress_image
+from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
+    JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket, Education
 
 HIGHLIGHTS_CHOICES = [
     ('free_food', 'Free Food'),
@@ -70,22 +68,17 @@ class JobPostingForm(forms.ModelForm):
         required=True
     )
 
-    company = forms.CharField(
-        max_length=100,
-        widget=forms.TextInput(attrs={
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-            'placeholder': 'Your company name',
-            'maxlength': '100',
-            'id': 'id_company'
-        }),
-        validators=[
-            RegexValidator(
-                regex='^[a-zA-Z0-9\s\-\&\,\.]+$',  # Allow letters, numbers, spaces, hyphens, commas, and periods
-                message='Only letters, numbers, spaces, hyphens, commas, and periods are allowed.',
-                code='invalid_company'
-            )
-        ],
-        help_text="Maximum 100 characters. Only letters, numbers, spaces, hyphens, commas, and periods are allowed.",
+    company = forms.ModelChoiceField(
+        queryset=OrganizationProfile.objects.none(),  # Placeholder, override in __init__
+        empty_label="Select a company",
+
+        widget=forms.Select(
+            attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+                'id': 'id_company',
+            }
+        ),
+        help_text="Select company",
         required=True
     )
 
@@ -185,7 +178,6 @@ class JobPostingForm(forms.ModelForm):
     )
 
     industry_type = forms.ChoiceField(
-
         widget=autocomplete.Select2(
             url='/career-listings/industry-autocomplete/',
             attrs={
@@ -201,8 +193,23 @@ class JobPostingForm(forms.ModelForm):
         required=True,
     )
 
-    department = forms.ChoiceField(
+    education = forms.ChoiceField(
+        widget=autocomplete.Select2(
+            url='/career-listings/education-autocomplete/',
+            attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+                'data-placeholder': 'Education',
+                'data-minimum-input-length': 1,
+                'data-theme': 'tailwindcss-3',
+                'data-tags': 'true',  # This enables free text entry
+                'id': 'id_education'
+            },
+            forward=['name'],
+        ),
+        required=True,
+    )
 
+    department = forms.ChoiceField(
         widget=autocomplete.ListSelect2(
             url='/career-listings/department-autocomplete/',
             attrs={
@@ -219,7 +226,6 @@ class JobPostingForm(forms.ModelForm):
     )
 
     role = forms.ChoiceField(
-
         widget=autocomplete.ListSelect2(
             url='/career-listings/role-autocomplete/',
             attrs={
@@ -236,8 +242,6 @@ class JobPostingForm(forms.ModelForm):
     )
 
     must_have_skills = forms.MultipleChoiceField(
-        initial=['a'],
-        choices=[('a', 'A'), ('b', 'B')],
         widget=autocomplete.Select2Multiple(
             url='/career-listings/skills-autocomplete/',
             attrs={
@@ -302,10 +306,19 @@ class JobPostingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         currency_type = kwargs.pop('currency_type', None)
+        user = kwargs.pop('user', None)  # Pass user from view
         super().__init__(*args, **kwargs)
 
         if self.instance:
             self.fields['expiry_date'].required = False
+
+        if user:
+            companies = OrganizationProfile.objects.filter(user=user)
+            self.fields['company'].queryset = companies
+
+            # Set the first company as default if available
+            if companies.exists():
+                self.fields['company'].initial = companies.first()
 
         if currency_type:
 
@@ -334,7 +347,8 @@ class JobPostingForm(forms.ModelForm):
         if self.instance:
             try:
                 # Check if all required fields exist in the instance
-                required_fields = ['must_have_skills', 'good_to_have_skills', 'role', 'department', 'industry_type']
+                required_fields = ['must_have_skills', 'good_to_have_skills', 'role', 'department', 'industry_type',
+                                   'education']
 
                 for field in required_fields:
                     if not hasattr(self.instance, field):
@@ -407,6 +421,21 @@ class JobPostingForm(forms.ModelForm):
                         department_choices = [(department, department) for department in all_choices]
                         self.fields['department'].choices = department_choices
 
+                if hasattr(self.instance, 'education'):
+                    if self.data:
+                        all_choices = [self.data['education']] if self.data[
+                            'education'] else [] + list(Education.objects.values_list('name', flat=True))
+                        education_choices = [(education, education) for education in all_choices]
+                        self.fields['education'].choices = education_choices
+
+                    else:
+                        all_choices = [
+                            self.instance.education] if self.instance.education else [] + list(
+                            Education.objects.values_list(
+                                'name', flat=True))
+                        education_choices = [(education, education) for education in all_choices]
+                        self.fields['education'].choices = education_choices
+
                 # Set initial values for other fields
                 self.initial['highlights'] = self.instance.highlights
 
@@ -419,8 +448,6 @@ class JobPostingForm(forms.ModelForm):
                 self.initial['industry_type'] = None
                 self.initial['highlights'] = None
                 raise ValidationError("Something went wrong.")
-
-
 
     class Meta:
         model = JobPosting
@@ -445,20 +472,12 @@ class JobPostingForm(forms.ModelForm):
                 'id': 'id_employment_type'
             }),
 
-            'education': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
-                'placeholder': 'e.g. Bachelor\'s degree in Computer Science',
-                'id': 'id_education'
-            }),
-
             'vacancies': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
                 'placeholder': 'Number of open positions',
                 'id': 'id_vacancies'
             }),
         }
-
-
 
     def clean(self):
         cleaned_data = super().clean()
@@ -471,7 +490,7 @@ class JobPostingForm(forms.ModelForm):
             """Ensure valid HTML structure using html5lib (adds missing closing tags)."""
             return serialize(parseFragment(html), tree="etree", omit_optional_tags=False)
 
-        if self.instance.status!='published':
+        if self.instance.status != 'published':
             raise ValidationError('Job listing is not published to update')
 
         description = self.cleaned_data.get('description', '').strip()
@@ -534,13 +553,16 @@ class JobPostingForm(forms.ModelForm):
 
         expiry_date = cleaned_data.get('expiry_date')
 
+
         if expiry_date:
             if expiry_date < self.tomorrow:
                 self.add_error('expiry_date', "Expiry date must be at least tomorrow.")
             if expiry_date > self.max_date:
                 self.add_error('expiry_date', "Expiry date cannot be more than 30 days from today.")
-        if self.instance:
+
+        if self.instance.expiry_date:
             cleaned_data['expiry_date'] = self.instance.expiry_date
+
 
         return cleaned_data
 

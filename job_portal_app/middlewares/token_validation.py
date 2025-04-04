@@ -5,36 +5,40 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect, QueryDict
-from django.urls import reverse, get_resolver, URLPattern, URLResolver
+from django.shortcuts import redirect
+from django.urls import reverse, get_resolver, URLPattern, URLResolver, resolve, Resolver404
 from django.utils.deprecation import MiddlewareMixin
 
-# Get the URL resolver
-url_resolver = get_resolver()
 
-def get_all_url_paths(url_patterns, parent=''):
-    urls = []
-    for pattern in url_patterns:
-        # If it's an instance of URLPattern, append the full URL path
-        if isinstance(pattern, URLPattern):
-            urls.append(parent + str(pattern.pattern))
-        # If it's an instance of URLResolver (i.e., it includes other URL patterns), recurse into it
-        elif isinstance(pattern, URLResolver):
-            urls.extend(get_all_url_paths(pattern.url_patterns, parent + str(pattern.pattern)))
-    return urls
+
+
 
 class TokenValidationMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
 
-        # Map all URL paths into a list
-        all_url_paths = get_all_url_paths(url_resolver.url_patterns)
-
         # Skip authentication for specific paths
         if request.path in [ '/','/admin/',  reverse('login_view'), reverse('logout_view')]:
             return None
 
-        if request.path not in all_url_paths:
-            return  None
+        try:
+            match = resolve(request.path_info)
+            view_module = match.func.__module__
+
+            if view_module.startswith('job_portal_app'):
+                user = request.user
+                if not user.is_authenticated:
+                    return self.redirect_to_login(request)
+                else:
+                    if user.is_terminated:
+                        if request.path in [reverse('account_terminated'), reverse('account')]:
+                            return None
+                        return HttpResponseRedirect(reverse('account_terminated'))
+
+        except Resolver404:
+            return None
+        except:
+            return None
 
 
         access_token = request.COOKIES.get('access_token')

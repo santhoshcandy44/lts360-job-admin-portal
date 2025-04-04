@@ -11,7 +11,7 @@ from django.contrib.auth import login, get_user_model, logout
 from django.core.mail import send_mail
 from django.db import connections
 from django.db.models import Count, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden, Http404
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views.generic import UpdateView
@@ -21,7 +21,7 @@ from job_portal import settings
 from .forms import JobPostingForm
 from .forms import OrganizationProfileForm, RecruiterProfileForm, RecruiterSettingsForm
 from .models import OrganizationProfile, RecruiterProfile, Department, JobIndustry, Role, Skills, \
-    RecruiterSettings, Plan, SalaryMarket, JobPosting
+    RecruiterSettings, Plan, SalaryMarket, JobPosting, Education
 
 
 def index(request):
@@ -199,6 +199,7 @@ def login_view(request):
             api_url = 'https://api.lts360.com/api/auth/partner/legacy-email-login/'  # External API for login
             try:
                 response = requests.post(api_url, data={'email': email, 'password': password})
+                print(response)
 
                 if response.status_code == 200 or response.status_code == 201:
                     api_response = response.json()
@@ -237,8 +238,13 @@ def login_view(request):
                         user_profile.is_verified = True
                         user_profile.save()
 
+                        RecruiterSettings.objects.get_or_create(user=user_profile)
+
                         # Log the user in
                         login(request, user)
+
+
+
 
                         # Set the access_token and refresh_token as HttpOnly cookies
                         response = redirect('/career-listings/dashboard/')  # Redirect to the dashboard
@@ -438,6 +444,7 @@ def add_new_job_listing(request):
         company_profile = None
     # Validate if the company profile is complete
     company_profile_complete = True
+
     if company_profile:
         if not company_profile.is_complete():
             # If company profile is incomplete, set the flag to show the alert
@@ -448,20 +455,24 @@ def add_new_job_listing(request):
 
     recruiter_settings_db = RecruiterSettings.objects.get(user=request.user.profile)
     recruiter_profile_complete = request.user.profile.is_profile_complete()
-    currency_type= recruiter_settings_db.currency_type
-    currency_symbol = recruiter_settings_db.get_currency_symbol
-    salary_market = SalaryMarket.objects.get(currency_type = currency_type )
+    currency_type = recruiter_settings_db.currency_type
+    salary_market = SalaryMarket.objects.get(currency_type=currency_type)
+
+
 
     salary_markers = {
-        'start': salary_market.salary_start,
-        'middle': salary_market.salary_middle,  # 500K
-        'end': salary_market.salary_end  # 1M
+        'start':  salary_market.format_currency_salary_start(),
+        'middle': salary_market.format_currency_salary_middle(),  # 500K
+        'end': salary_market.format_currency_salary_end(),  # 1M
+        'currency_symbol': salary_market.currency_symbol()
     }
+
 
     # Proceed with the job posting form
     if request.method == 'POST':
-        form = JobPostingForm(request.POST, currency_type=currency_type)
+        form = JobPostingForm(request.POST, currency_type=currency_type, user=request.user.profile)
         if form.is_valid():
+
             form = form.save(commit=False)
             form.posted_by = request.user.profile
             form.organization_id = company_profile.organization_id
@@ -472,16 +483,14 @@ def add_new_job_listing(request):
             return render(request, 'job_portal/add_new_listing.html',
                           {'form': form, 'company_profile_complete': company_profile_complete,
                            'recruiter_profile_complete': recruiter_profile_complete,
-                           'currency_symbol': currency_symbol,
                            'salary_markers': salary_markers,
                            'can_post_job': company_profile_complete and recruiter_profile_complete})
     else:
-        form = JobPostingForm(currency_type=currency_type)  # Empty form for GET request
+        form = JobPostingForm(currency_type=currency_type, user=request.user.profile)  # Empty form for GET request
 
     return render(request, 'job_portal/add_new_listing.html',
                   {'form': form, 'company_profile_complete': company_profile_complete,
                    'recruiter_profile_complete': recruiter_profile_complete,
-                   'currency_symbol': currency_symbol,
                    'salary_markers': salary_markers,
                    'can_post_job': company_profile_complete and recruiter_profile_complete})
 
@@ -539,6 +548,9 @@ def all_job_listings(request):
         'date_to': request.GET.get('date_to'),
     }
 
+    for i in page_obj:
+        print(i.salary_min)
+
     all_none = all(not value for value in active_filters.values())  # True if all are None or ""
     return render(request, 'job_portal/all_listings.html', {
         'page_obj': page_obj,
@@ -552,19 +564,20 @@ def edit_job_listing(request, job_id):
     recruiter_settings_db = RecruiterSettings.objects.get(user=request.user.profile)
     recruiter_profile_complete = request.user.profile.is_profile_complete()
     currency_type = recruiter_settings_db.currency_type
-    currency_symbol = recruiter_settings_db.get_currency_symbol
-    salary_market = SalaryMarket.objects.get(currency_type=currency_type)
+    salary_market = SalaryMarket.objects.get(currency_type = currency_type)
 
     salary_markers = {
-        'start': salary_market.salary_start,
-        'middle': salary_market.salary_middle,  # 500K
-        'end': salary_market.salary_end  # 1M
+        'start': salary_market.format_currency_salary_start(),
+        'middle': salary_market.format_currency_salary_middle(),  # 500K
+        'end': salary_market.format_currency_salary_end(),  # 1M
+        'currency_symbol': salary_market.currency_symbol()
     }
+
 
     job_posting = get_object_or_404(JobPosting, pk=job_id)
 
     if request.method == 'POST':
-        form = JobPostingForm(request.POST, instance=job_posting, currency_type=currency_type)
+        form = JobPostingForm(request.POST, instance=job_posting, currency_type=currency_type,user=request.user.profile)
         if form.is_valid():
             form.save()
             return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
@@ -574,16 +587,14 @@ def edit_job_listing(request, job_id):
                           {'form': form,
                            'job_posting': job_posting,
                            'recruiter_profile_complete': recruiter_profile_complete,
-                           'currency_symbol': currency_symbol,
                            'salary_markers': salary_markers})
 
     else:
-        form = JobPostingForm(instance=job_posting, currency_type=currency_type)  # Pre-populate the form with the existing job data
+        form = JobPostingForm(instance=job_posting, currency_type=currency_type, user=request.user.profile)  # Pre-populate the form with the existing job data
 
 
     return render(request, 'job_portal/edit_job_listing.html', {'form': form, 'job_posting': job_posting,
                                                                 'recruiter_profile_complete': recruiter_profile_complete,
-                                                                'currency_symbol': currency_symbol,
                                                                 'salary_markers': salary_markers
                                                                 })
 
@@ -1124,6 +1135,19 @@ class IndustryAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+
+class EducationAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Education.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                Q(name__icontains=self.q) |  # Search name
+                Q(code__icontains=self.q)  # Search code
+            )
+        return qs
+
+
 class RoleAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Role.objects.all()
@@ -1144,6 +1168,27 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
                 Q(code__icontains=self.q)  # Search code
             )
         return qs
+
+class CompanyAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return OrganizationProfile.objects.none()
+
+        profile = self.request.user.profile
+
+        qs = OrganizationProfile.objects.filter(user=profile)
+
+        if self.q:
+            qs = qs.filter(organization_name__icontains=self.q)
+
+        return qs
+
+
+def account_terminated(request):
+    if request.user.is_terminated:
+        return render(request, 'job_portal/auth/account_terminated.html')
+    else:
+        raise Http404()
 
 def handler404(request, exception):
     context = {

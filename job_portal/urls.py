@@ -1,9 +1,9 @@
 # project/urls.py
 
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('career-listings/', include('job_portal_app.urls')),  # Include your app's URLs
+    path('career-listings/', include('job_portal_app.urls',  namespace='job_portal_app')),  # Include your app's URLs
 ]

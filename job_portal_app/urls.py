@@ -21,7 +21,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
-from .views import DepartmentAutocomplete, IndustryAutocomplete, RoleAutocomplete, SkillsAutocomplete
+from .views import DepartmentAutocomplete, IndustryAutocomplete, RoleAutocomplete, SkillsAutocomplete, \
+    EducationAutocomplete, CompanyAutocomplete
 
 app_name = 'job_portal_app'  # This defines the namespace
 
@@ -83,20 +84,32 @@ urlpatterns = [
 
     path('career-listings/department-autocomplete/',
          DepartmentAutocomplete.as_view(),
-         name='department-autocomplete'),
+         name='department_autocomplete'),
 
     path('career-listings/industry-autocomplete/',
          IndustryAutocomplete.as_view(),
-         name='industry-autocomplete'),
+         name='industry_autocomplete'),
+
+    path('career-listings/education-autocomplete/',
+         EducationAutocomplete.as_view(),
+         name='education_autocomplete'),
+
+    path('career-listings/company-autocomplete/',
+        CompanyAutocomplete.as_view(),
+         name='company_autocomplete'),
+
 
     path('career-listings/role-autocomplete/',
          RoleAutocomplete.as_view(),
-         name='role-autocomplete'),
+         name='role_autocomplete'),
 
     path('career-listings/skills-autocomplete/',
          SkillsAutocomplete.as_view(),
-         name='skills-autocomplete'),
+         name='skills_autocomplete'),
     path('google-auth-callback/', views.google_auth_callback, name="google_auth_callback"),
+
+    path('career-listings/account-terminated/', views.account_terminated, name='account_terminated'),
+
 ]
 
 # Serve media files in development

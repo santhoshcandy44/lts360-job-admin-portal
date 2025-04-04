@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db import transaction, IntegrityError
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
@@ -15,9 +16,10 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class ExternalLinkUser(AbstractUser):
     external_user_id = models.CharField(max_length=255)
+    is_terminated = models.BooleanField(default=False)  # 👈 Add this field
+
     class Meta:
         db_table = 'lts360_jobs_auth_user'  # Custom table name
-
 
     def __str__(self):
         return self.external_user_id
@@ -262,6 +264,9 @@ class OrganizationProfile(models.Model):
         else:
             super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.organization_name
+
 
 class JobPosting(models.Model):
     title = models.CharField(max_length=100)
@@ -270,7 +275,8 @@ class JobPosting(models.Model):
                                  choices=[('remote', 'Remote'), ('office', 'Office'), ('hybrid', 'Hybrid')],
                                  default='office', blank=False)
     location = models.CharField(max_length=100)
-    company = models.CharField(max_length=100)
+
+    company = models.ForeignKey('OrganizationProfile', on_delete=models.CASCADE, related_name='job_posts')
 
     description = models.TextField()
 
@@ -331,63 +337,69 @@ class JobPosting(models.Model):
         Custom validation to ensure that only one of the experience fields is filled
         based on the selected experience type.
         """
+
         if self.experience_type == 'fresher':
-            # For fresher, min-max and fixed experience should not be used
-            if self.experience_range_min != 0 or self.experience_range_max != 0:
-                raise ValidationError(
-                    {"experience_range_min": "For fresher, experience range should not be set.",
-                     "experience_range_max": "For fresher, experience range should not be set."}
-                )
+            self.experience_range_min = 0
+            self.experience_range_max = 0
+            self.experience_fixed = 0
 
-            if self.experience_fixed != 0:
-                raise ValidationError({"experience_fixed": "For fresher, fixed experience should not be set."})
 
-        elif self.experience_type == 'min-max':
+        elif self.experience_type == 'min_max':
             # If min-max type is selected, make sure the min is less than max
             if self.experience_range_min >= self.experience_range_max:
                 raise ValidationError(
                     {"experience_range_min": "Minimum experience should be less than maximum experience.",
                      "experience_range_max": "Maximum experience should be greater than minimum experience."}
                 )
+
             # Ensure fixed experience is not set when using min-max
-            if self.experience_fixed != 2:
-                raise ValidationError(
-                    {"experience_fixed": "Fixed experience should not be set when using min-max experience type."})
+            if self.experience_fixed > 0:
+                self.experience_fixed = 0
+
 
         elif self.experience_type == 'fixed':
-            # For fixed experience type, make sure min-max experience range is not set
-            if self.experience_range_min != 0 or self.experience_range_max != 0:
+            if self.experience_fixed <= 0:
                 raise ValidationError(
-                    {"experience_range_min": "Experience range should not be set when using fixed experience type.",
-                     "experience_range_max": "Experience range should not be set when using fixed experience type."}
+                    {"experience_fixed": "Fixed experience should be greater than zero experience."}
                 )
 
+            # For fixed experience type, reset min-max experience range to 0
+            self.experience_range_min = 0
+            self.experience_range_max = 0
 
-            # Salary validation logic
+
+
         if not self.salary_not_disclosed:
             # When salary IS disclosed (salary_not_disclosed is False)
             if self.salary_min is None or self.salary_max is None:
-                raise ValidationError(
-                    "You must either provide both salary range values (minimum and maximum) "
-                    "or check 'Salary Not Disclosed'",
-                    code='incomplete_salary_info'
-                )
-
+                raise ValidationError({
+                    'salary_min': ValidationError("Minimum salary is required.", code='missing_salary_min'),
+                    'salary_max': ValidationError("Maximum salary is required.", code='missing_salary_max'),
+                })
             if self.salary_min > self.salary_max:
-                raise ValidationError(
-                    "Minimum salary cannot be greater than maximum salary",
-                    code='invalid_salary_range'
-                )
+                raise ValidationError({
+                        'salary_min': ValidationError("Minimum salary cannot be greater than maximum salary.",
+                                                      code='invalid_range'),
+                        'salary_max': ValidationError("Maximum salary must be greater than minimum salary.",
+                                                      code='invalid_range'),
+                    })
 
-            if self.salary_min < 0 or self.salary_max < 0:
-                raise ValidationError(
-                    "Salary values cannot be negative",
-                    code='negative_salary'
-                )
+            if self.salary_min <= 0:
+                raise ValidationError({
+                    'salary_min': ValidationError("Minimum salary cannot be zero or less than zero.", code='negative_min_salary'),
+                })
+
+            if self.salary_max <= 0:
+                raise ValidationError({
+                    'salary_max': ValidationError("Maximum salary cannot be zero or less than zero.", code='negative_max_salary'),
+                })
         else:
             # When salary is NOT disclosed (salary_not_disclosed is True)
             self.salary_min = 0.00
             self.salary_max = 0.00
+
+
+
 
         if self.expiry_date:
             tomorrow = date.today() + timedelta(days=1)
@@ -422,8 +434,42 @@ class JobPosting(models.Model):
         """Returns True if the job posting is published"""
         return self.status == 'published'
 
+    def _format_salary_with_settings(self, salary):
+        recruiter_settings = get_object_or_404(RecruiterSettings, user=self.posted_by)
 
+        currency_symbol = recruiter_settings.get_currency_symbol()
+        currency_type = recruiter_settings.get_currency_type().upper()
 
+        if currency_type == 'INR':
+            if salary >= 1_00_00_000:
+                formatted = f"{salary / 1_00_00_000:.2f} Cr"
+            elif salary >= 1_00_000:
+                formatted = f"{salary / 1_00_000:.2f} Lakh"
+            else:
+                formatted = f"{salary}"
+        else:
+            if salary >= 1_000_000:
+                formatted = f"{salary / 1_000_000:.2f}M"
+            elif salary >= 1_000:
+                formatted = f"{salary / 1_000:.2f}K"
+            else:
+                formatted = f"{salary}"
+
+        return f"{currency_symbol}{formatted}"
+
+    @property
+    def formatted_salary_min(self):
+        try:
+            return self._format_salary_with_settings(self.salary_min)
+        except RecruiterSettings.DoesNotExist:
+            return str(self.salary_min)
+
+    @property
+    def formatted_salary_max(self):
+        try:
+            return self._format_salary_with_settings(self.salary_max)
+        except RecruiterSettings.DoesNotExist:
+            return str(self.salary_max)
 
 
 class JobApplication(models.Model):
@@ -1663,13 +1709,44 @@ class SalaryMarket(models.Model):
         """
         Return the currency symbol based on the currency type.
         """
-        return self.CURRENCY_SYMBOLS.get(self.currency_type, '₹')  # Default to '₹' if no symbol is found
+        return self.CURRENCY_SYMBOLS.get(self.currency_type)  # Default to '₹' if no symbol is found
 
     def get_salary_range(self):
         """
         Returns a tuple containing the salary range: start, middle, and end.
         """
         return (self.salary_start, self.salary_middle, self.salary_end)
+
+    def _format_salary(self, salary):
+        if self.currency_type == 'INR':
+            if salary >= 1_00_00_000:
+                formatted = f"{salary / 1_00_00_000:.2f} Cr"
+            elif salary >= 1_00_000:
+                formatted = f"{salary / 1_00_000:.2f} Lakh"
+            else:
+                formatted = f"{salary}"
+        else:
+            if salary >= 1_000_000:
+                formatted = f"{salary / 1_000_000:.2f}M"
+            elif salary >= 1_000:
+                formatted = f"{salary / 1_000:.2f}K"
+            else:
+                formatted = f"{salary}"
+
+        return f"{self.CURRENCY_SYMBOLS.get(self.currency_type)}{formatted}"
+
+    def currency_symbol(self):
+        return self.CURRENCY_SYMBOLS.get(self.currency_type)
+
+    def format_currency_salary_start(self):
+        return self._format_salary(self.salary_start)
+
+
+    def format_currency_salary_middle(self):
+        return self._format_salary(self.salary_middle)
+
+    def format_currency_salary_end(self):
+        return self._format_salary(self.salary_end)
 
 
 class RecruiterSettings(models.Model):
@@ -1709,8 +1786,11 @@ class RecruiterSettings(models.Model):
         """
         return self.CURRENCY_SYMBOLS.get(self.currency_type, '₹')  # Default to '₹' if no symbol is found
 
+    def get_currency_type(self):
+        return self.currency_type
+
     def __str__(self):
-        return f"Settings for {self.user.get_full_name()}"
+        return f"Settings for {self.user.first_name} {self.user.last_name}"
 
 
 class Plan(models.Model):

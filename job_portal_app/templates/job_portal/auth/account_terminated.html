@@ -1,0 +1,78 @@
+{% extends "job_portal/base_site.html" %}
+
+{% block title %}Account Termination Notice | LTS360 Career Listings{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white shadow rounded-lg p-6 md:p-8">
+
+        <!-- Header with perfectly vertically aligned icon -->
+        <div class="flex items-center mb-6">
+            <svg class="h-10 w-10 text-red-500 flex-shrink-0 mr-3 mt-1" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <h1 class="text-2xl font-bold text-gray-900">Account Termination Notice</h1>
+        </div>
+
+        <div class="mb-6">
+            <p class="text-gray-600 mt-2">Your account access has been permanently revoked</p>
+        </div>
+
+        <div class="prose prose-red max-w-none">
+            <p class="text-gray-600 mb-4">
+                Your LTS360 career listings account has been terminated effective immediately. This action was taken
+                because:
+            </p>
+
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">
+                            {% if termination_reason %}
+                            {{ termination_reason }}
+                            {% else %}
+                            Violation of our Terms of Service
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-gray-600">
+                <p>As a result of this termination:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Your career profile is no longer visible on our platform</li>
+                    <li>All active career listings have been removed</li>
+                    <li>Restrictions have been applied to access career listing account.</li>
+                </ul>
+
+                <p>If you believe this action was taken in error, you may appeal this decision by contacting our support
+                    team.</p>
+            </div>
+        </div>
+
+        <div class="mt-8 border-t border-gray-200 pt-6">
+            <a href="{% url 'index' %}"
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Contact Support
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

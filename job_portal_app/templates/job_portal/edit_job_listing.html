@@ -499,12 +499,14 @@ input[type="date"]::-webkit-datetime-edit-day-field {
         <div class="relative">
             {{ form.salary_min }}
             <div class="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{{ currency_symbol }}{{ salary_markers.start|floatformat:"0" }}</span>
-                <span>{{ currency_symbol }}{{ salary_markers.middle|floatformat:"0"|slice:":-3" }}K</span>
-                <span>{{ currency_symbol }}{{ salary_markers.end|floatformat:"0"|slice:":-3" }}M</span>
+                 <span>{{ salary_markers.start }}</span>
+                <span>{{ salary_markers.middle }}</span>
+                <span>{{ salary_markers.end }}</span>
             </div>
-            <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-min-value">
-                {{ currency_symbol }}{{ form.salary_min.value|default:"0" }}
+              <div class="mt-2 text-center text-sm font-medium text-blue-600" >
+
+                       {{ salary_markers.currency_symbol }}  <span  id="salary-min-value">
+                {{ form.salary_min.value|default:"0" }} </span>
             </div>
         </div>
         {% if form.salary_min.errors %}
@@ -527,12 +529,14 @@ input[type="date"]::-webkit-datetime-edit-day-field {
         <div class="relative">
             {{ form.salary_max }}
             <div class="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{{ currency_symbol }}{{ salary_markers.start|floatformat:"0" }}</span>
-                <span>{{ currency_symbol }}{{ salary_markers.middle|floatformat:"0"|slice:":-3" }}K</span>
-                <span>{{ currency_symbol }}{{ salary_markers.end|floatformat:"0"|slice:":-3" }}M</span>
+                <span>{{ salary_markers.start }}</span>
+                <span>{{ salary_markers.middle }}</span>
+                <span>{{ salary_markers.end }}</span>
             </div>
-            <div class="mt-2 text-center text-sm font-medium text-blue-600" id="salary-max-value">
-                {{ currency_symbol }}{{ form.salary_max.value|default:"0" }}
+            <div class="mt-2 text-center text-sm font-medium text-blue-600" >
+                {{ salary_markers.currency_symbol }} <span id="salary-max-value">
+                {{ form.salary_max.value|default:"0" }}
+            </span>
             </div>
         </div>
         {% if form.salary_max.errors %}
