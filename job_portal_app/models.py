@@ -12,6 +12,9 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
+from slugify import slugify
+
+from job_portal import settings
 
 
 class ExternalLinkUser(AbstractUser):
@@ -153,7 +156,15 @@ def get_user_profile_upload_path(instance, filename):
     return os.path.join('users', str(instance.user_id), 'profile', filename)
 
 
+def generate_unique_11_digit_id():
+    while True:
+        uid = random.randint(10_000_000_000, 99_999_999_999)  # 11-digit number
+        if not UserProfile.objects.filter(unique_id=uid).exists():
+            return uid
+
 class UserProfile(models.Model):
+    id = models.BigIntegerField(primary_key=True, default=generate_unique_11_digit_id, unique=True)
+
     # Inherit from UserProfile if needed, or just copy relevant fields to make StudentProfile standalone
     external_user_id = models.CharField(max_length=255)  # External ID, like social media or university ID
 
@@ -268,7 +279,16 @@ class OrganizationProfile(models.Model):
         return self.organization_name
 
 
+def generate_unique_10_digit_id():
+    while True:
+        uid = random.randint(1000000000, 9999999999)  # 10-digit number
+        if not JobPosting.objects.filter(id=uid).exists():
+            return uid
+
+
 class JobPosting(models.Model):
+    id = models.BigIntegerField(primary_key=True, default=generate_unique_10_digit_id, unique=True)
+
     title = models.CharField(max_length=100)
 
     work_mode = models.CharField(max_length=50,
@@ -325,6 +345,14 @@ class JobPosting(models.Model):
         default='published'
     )
 
+    APPROVAL_STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('rejected', 'Rejected'),
+    ]
+
+    approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS_CHOICES, default='active')
+
+    slug = models.SlugField(max_length=300, unique=True, blank=False)
 
     class Meta:
         db_table = 'lts360_jobs'  # Custom table name
@@ -471,8 +499,29 @@ class JobPosting(models.Model):
         except RecruiterSettings.DoesNotExist:
             return str(self.salary_max)
 
+    @property
+    def build_slug_url(self):
+        base_url = getattr(settings, 'ROOT_BASE_URL', 'https://www.lts360.com')
+        return f"{base_url.rstrip('/')}/jobs/{self.slug}/"
+
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            super().save(*args, **kwargs)  # Save once to get an ID
+            self.slug = f"{base_slug}-{self.id}"
+        super().save(*args, **kwargs)
+
+
+def generate_unique_8_digit_id():
+    while True:
+        uid = random.randint(10_000_000, 99_999_999)  # 8-digit number
+        if not JobApplication.objects.filter(id=uid).exists():
+            return uid
+
 
 class JobApplication(models.Model):
+    id = models.BigIntegerField(primary_key=True, default=generate_unique_8_digit_id, unique=True)
     user = models.ForeignKey('UserProfile', on_delete=models.CASCADE)  # Link to StudentProfile (ForeignKey)
     job_listing = models.ForeignKey('JobPosting', on_delete=models.CASCADE,
                                     related_name='applications')  # Foreign key to JobPosting model

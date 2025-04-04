@@ -147,10 +147,21 @@
                 </span>
                 </div>
 
-                <!-- Status Badge (Example) -->
-                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
-                Active
-            </span>
+
+                {% if posting.status == 'published' %}
+    <!-- Show approval status for published posts -->
+    <span class="text-xs font-medium px-2.5 py-0.5 rounded-full
+        {% if posting.approval_status == 'active' %}bg-green-100 text-green-800
+        {% elif posting.approval_status == 'rejected' %}bg-red-100 text-red-800
+        {% else %}bg-gray-100 text-gray-800{% endif %}">
+        {{ posting.get_approval_status_display }}
+    </span>
+{% elif posting.status == 'draft' %}
+    <!-- Show draft status badge -->
+    <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+        Draft
+    </span>
+{% endif %}
             </div>
 
             <!-- Job Title -->

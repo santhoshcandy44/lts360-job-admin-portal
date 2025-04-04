@@ -1,7 +1,6 @@
 import datetime
 import json
 import random
-from audioop import reverse
 from datetime import timedelta
 
 import jwt
@@ -11,17 +10,15 @@ from django.contrib.auth import login, get_user_model, logout
 from django.core.mail import send_mail
 from django.db import connections
 from django.db.models import Count, Q
-from django.http import JsonResponse, HttpResponseForbidden, Http404
+from django.http import JsonResponse, Http404
 from django.utils import timezone
 from django.utils.timezone import now
-from django.views.generic import UpdateView
-from tailwind.validate import ValidationError
 
 from job_portal import settings
 from .forms import JobPostingForm
 from .forms import OrganizationProfileForm, RecruiterProfileForm, RecruiterSettingsForm
 from .models import OrganizationProfile, RecruiterProfile, Department, JobIndustry, Role, Skills, \
-    RecruiterSettings, Plan, SalaryMarket, JobPosting, Education
+    RecruiterSettings, Plan, SalaryMarket, Education
 
 
 def index(request):
@@ -199,7 +196,6 @@ def login_view(request):
             api_url = 'https://api.lts360.com/api/auth/partner/legacy-email-login/'  # External API for login
             try:
                 response = requests.post(api_url, data={'email': email, 'password': password})
-                print(response)
 
                 if response.status_code == 200 or response.status_code == 201:
                     api_response = response.json()
@@ -548,8 +544,7 @@ def all_job_listings(request):
         'date_to': request.GET.get('date_to'),
     }
 
-    for i in page_obj:
-        print(i.salary_min)
+
 
     all_none = all(not value for value in active_filters.values())  # True if all are None or ""
     return render(request, 'job_portal/all_listings.html', {

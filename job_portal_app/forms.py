@@ -30,15 +30,19 @@ HIGHLIGHTS_CHOICES = [
 
 class JobPostingForm(forms.ModelForm):
     title = forms.CharField(
+        min_length=25,
         max_length=50,
         widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'placeholder': 'e.g. Senior Software Engineer',
+            'minlength': '30',
             'maxlength': '50',
             'id': 'id_title',
 
         }),
         validators=[
+            MinLengthValidator(30),
+            MaxLengthValidator(50),
             RegexValidator(
                 regex='^[a-zA-Z0-9\s\-\&\.\,]+$',  # You can adjust the allowed characters as per your needs
                 message='Only letters, numbers, spaces, hyphens, ampersands, periods, and commas are allowed.',
@@ -585,6 +589,7 @@ class UpdateStatusForm(forms.ModelForm):
 
 
 class OrganizationProfileForm(forms.ModelForm):
+
     organization_name = forms.CharField(
         max_length=100,
         widget=forms.TextInput(attrs={
@@ -598,7 +603,8 @@ class OrganizationProfileForm(forms.ModelForm):
                 regex='^[a-zA-Z0-9\s\-\.,&]+$',
                 message='Only letters, numbers, spaces, hyphens, commas, periods and ampersands are allowed',
                 code='invalid_organization_name'
-            )
+            ),
+
         ],
         help_text="Maximum 100 characters (letters, numbers and basic punctuation only)",
         required=True

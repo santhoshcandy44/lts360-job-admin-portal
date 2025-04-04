@@ -10,9 +10,6 @@ from django.urls import reverse, get_resolver, URLPattern, URLResolver, resolve,
 from django.utils.deprecation import MiddlewareMixin
 
 
-
-
-
 class TokenValidationMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
@@ -27,7 +24,8 @@ class TokenValidationMiddleware(MiddlewareMixin):
 
             if view_module.startswith('job_portal_app'):
                 user = request.user
-                if not user.is_authenticated:
+                if request.user.is_anonymous and not request.user.is_authenticated:
+                    print("Anonymous")
                     return self.redirect_to_login(request)
                 else:
                     if user.is_terminated:
@@ -39,7 +37,6 @@ class TokenValidationMiddleware(MiddlewareMixin):
             return None
         except:
             return None
-
 
         access_token = request.COOKIES.get('access_token')
         refresh_token = request.COOKIES.get('refresh_token')
