@@ -876,6 +876,24 @@ input[type="date"]::-webkit-datetime-edit-day-field {
         textarea.style.height = textarea.scrollHeight + "px"; // Expand dynamically
     }
 
+
+             tinymce.init({
+    selector: '#id_description',
+    branding: false,
+    plugins: 'advlist lists autoresize',
+    toolbar: 'bold italic underline | bullist numlist',
+    promotion: false,
+    menubar: false, // Hides the top menu
+    resize: false,   // Prevents resizing
+ min_height: 400,
+     statusbar: false,
+    formats: {
+        underline: { inline: 'u', exact: true }
+    },
+    invalid_elements: 'span,div,script,img,table,blockquote',
+    valid_elements: 'p,strong/b,em/i,u,ul,ol,li',
+});
+
     document.addEventListener('DOMContentLoaded', function() {
 
 

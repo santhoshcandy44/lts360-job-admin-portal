@@ -29,7 +29,7 @@ handler404 = 'job_portal_app.views.handler404'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('summernote/', include('django_summernote.urls')),
+    path('tinymce/', include('tinymce.urls')),  # TinyMCE URL setup
     path("__reload__/", include("django_browser_reload.urls")),
     path('', views.index, name='index'),
     path('career-listings/login/', views.login_view, name='login_view'),

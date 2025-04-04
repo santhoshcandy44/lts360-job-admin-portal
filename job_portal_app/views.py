@@ -106,7 +106,7 @@ def login_view(request):
                 errors.append("Something went wrong")
                 return render(request, "job_portal/login.html", {'errors': errors})
 
-            api_url = 'https://api.lts360.com/api/auth/google-sign-in/'  # External API for login
+            api_url = 'https://api.lts360.com/api/auth/partner/google-sign-in/'  # External API for login
             try:
                 response = requests.post(api_url, data={'id_token': id_token, 'sign_in_method': sign_in_method})
 
@@ -196,7 +196,7 @@ def login_view(request):
                 errors.append("Email and password are required.")
                 return render(request, "login.html", {'errors': errors})
 
-            api_url = 'https://api.lts360.com/api/auth/legacy-email-login/'  # External API for login
+            api_url = 'https://api.lts360.com/api/auth/partner/legacy-email-login/'  # External API for login
             try:
                 response = requests.post(api_url, data={'email': email, 'password': password})
 

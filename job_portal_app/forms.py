@@ -1,7 +1,10 @@
 # job_postings/forms.py
 import datetime
 import json
+import re
 
+import bleach
+from bleach.sanitizer import ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
@@ -9,6 +12,8 @@ from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import MaxLengthValidator, EmailValidator, \
     RegexValidator, FileExtensionValidator, MinLengthValidator
 from django.forms import SelectDateWidget
+from html5lib import serialize, parseFragment
+from tinymce.widgets import TinyMCE
 
 from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
     JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket
@@ -86,14 +91,16 @@ class JobPostingForm(forms.ModelForm):
 
     description = forms.CharField(
         max_length=2000,
-        widget=forms.Textarea(attrs={
+        widget=TinyMCE(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'placeholder': 'Describe the job responsibilities and requirements...',
             'maxlength': '1000',
             'id': 'id_description',
             'oninput': 'autoResize(this)',
+            'cols': 100,
+
             'style': 'min-height: 8rem; overflow-y: hidden; resize: none;'
-        }),
+        }, ),
         validators=[
             MinLengthValidator(50),  # Ensure the description is at least 50 characters
             MaxLengthValidator(1000)  # Ensure the description does not exceed 2000 characters
@@ -451,11 +458,45 @@ class JobPostingForm(forms.ModelForm):
             }),
         }
 
+
+
     def clean(self):
         cleaned_data = super().clean()
 
+        def normalize_html(html):
+            """Remove excess whitespace for fair comparison."""
+            return re.sub(r'\s+', ' ', html).strip()
+
+        def fix_html_structure(html):
+            """Ensure valid HTML structure using html5lib (adds missing closing tags)."""
+            return serialize(parseFragment(html), tree="etree", omit_optional_tags=False)
+
         if self.instance.status!='published':
             raise ValidationError('Job listing is not published to update')
+
+        description = self.cleaned_data.get('description', '').strip()
+
+        ALLOWED_TAGS = ['p', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li']
+        ALLOWED_ATTRIBUTES = {}  # No additional attributes allowed
+        ALLOWED_PROTOCOLS = []  # No hyperlinks needed
+
+        # Sanitize input using bleach
+        cleaned_description = bleach.clean(
+            description,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            protocols=ALLOWED_PROTOCOLS,
+            strip=True,  # Remove disallowed tags but keep content
+            strip_comments=True  # Remove any HTML comments
+        )
+
+        fixed_original = fix_html_structure(description)
+        fixed_cleaned = fix_html_structure(cleaned_description)
+
+        # Normalize both original & cleaned to avoid whitespace-related mismatches
+        if normalize_html(fixed_cleaned) != normalize_html(fixed_original):
+            raise ValidationError("Invalid description formatting detected.")
+
         salary_not_disclosed = cleaned_data.get('salary_not_disclosed')
         salary_min = cleaned_data.get('salary_min')
         salary_max = cleaned_data.get('salary_max')
