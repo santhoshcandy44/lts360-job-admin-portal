@@ -4,9 +4,8 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from django.conf import settings
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect, QueryDict
-from django.shortcuts import redirect
-from django.urls import reverse, get_resolver, URLPattern, URLResolver, resolve, Resolver404
+from django.http import HttpResponseRedirect
+from django.urls import reverse, resolve, Resolver404
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -42,17 +41,30 @@ class TokenValidationMiddleware(MiddlewareMixin):
         refresh_token = request.COOKIES.get('refresh_token')
 
         # No tokens found - redirect to login
-        if not access_token or not refresh_token:
+        if not access_token and not refresh_token:
+            print("Both tokens not found")
+            return self.redirect_to_login(request)
+        if not refresh_token:
+            print("Tokens not found")
             return self.redirect_to_login(request)
 
         try:
-            # Verify access token
-            data = jwt.decode(access_token, settings.ACCESS_TOKEN_SECRET, algorithms=["HS256"])
-            request.user_id =data['userId']
-            return None
+            # If access token exists, try to verify it
+            if access_token:
+                data = jwt.decode(access_token, settings.ACCESS_TOKEN_SECRET, algorithms=["HS256"])
+                request.user_id = data['userId']
+                return None
+            else:
+                print("Missing refresh token: refreshing")
+                # Access token missing → try refresh
+                return self.handle_expired_token(request, refresh_token)
+
         except jwt.ExpiredSignatureError:
+            # Access token expired → try refresh
             return self.handle_expired_token(request, refresh_token)
+
         except jwt.InvalidTokenError:
+            # Token is malformed or tampered
             return self.redirect_to_login(request)
 
     def handle_expired_token(self, request, refresh_token):
@@ -66,11 +78,7 @@ class TokenValidationMiddleware(MiddlewareMixin):
             # Create cloned request with new tokens
             cloned_request = self.clone_request_with_tokens(request, new_access_token, new_refresh_token)
 
-            response = (
-                HttpResponseRedirect(cloned_request.get_full_path())
-                if cloned_request.method == 'GET'
-                else self.get_response(cloned_request)
-            )
+            response = (HttpResponseRedirect(cloned_request.get_full_path())if cloned_request.method == 'GET' else self.get_response(cloned_request) )
 
             return self.add_tokens_to_response(response, new_access_token, new_refresh_token)
 

@@ -11,14 +11,20 @@
     </div>
 
 
-  <!-- Profile Completion Alert (if incomplete) -->
+    <!-- Profile Completion Alert (if incomplete) -->
     {% if is_recruiter_profile_complete %}
     <div class="bg-white shadow overflow-hidden sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">
-                <i class="fas fa-cog mr-2 text-indigo-500"></i>
+            <h3 class="flex items-center text-lg leading-6 font-medium text-gray-900">
+                <svg class="w-5 h-5 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clip-rule="evenodd"/>
+                </svg>
                 Currency Settings
             </h3>
+
             <p class="mt-1 max-w-2xl text-sm text-gray-500">
                 Manage your preferred currency for job listings.
             </p>
@@ -31,22 +37,27 @@
 
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-4">
-                        <label for="{{ form.currency_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        <label for="{{ form.currency_type.id_for_label }}"
+                               class="block text-sm font-medium text-gray-700">
                             Preferred Currency
                         </label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             {{ form.currency_type }}
                         </div>
                         {% if form.currency_type.errors %}
-                            <p class="mt-2 text-sm text-red-600">{{ form.currency_type.errors.as_text }}</p>
+                        <p class="mt-2 text-sm text-red-600">{{ form.currency_type.errors.as_text }}</p>
                         {% endif %}
                     </div>
                 </div>
 
                 <div class="pt-5">
                     <div class="flex justify-end">
-                        <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <i class="fas fa-save mr-2"></i>
+                        <button type="submit"
+                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
+                            </svg>
                             Save Changes
                         </button>
                     </div>
@@ -59,7 +70,10 @@
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-md">
         <div class="flex">
             <div class="flex-shrink-0">
-                <i class="fas fa-exclamation-circle h-5 w-5 text-yellow-400"></i>
+                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+                </svg>
             </div>
             <div class="ml-3">
                 <h3 class="text-sm font-medium text-yellow-800">Profile Incomplete</h3>
@@ -70,7 +84,12 @@
                     <a href="{% url 'recruiter_profile' %}"
                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
                         Complete Profile
-                        <i class="fas fa-arrow-right ml-2"></i>
+                        <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                  clip-rule="evenodd"/>
+                        </svg>
                     </a>
                 </div>
             </div>

@@ -36,7 +36,11 @@
         <div class="flex items-center space-x-4">
             <a href="career-listings/login" class="hidden md:block text-indigo-600 hover:text-indigo-800 font-medium">Login</a>
             <button id="mobile-menu-button" class="md:hidden text-gray-700" aria-expanded="false">
-                <i class="fas fa-bars text-xl"></i>
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                          clip-rule="evenodd"></path>
+                </svg>
             </button>
         </div>
     </div>
@@ -55,10 +59,6 @@
 
 <!-- Hero Section -->
 <section class="relative bg-white text-gray-800 py-20 md:py-32">
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-purple-100 rounded-full -mr-32 -mt-32"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100 rounded-full -ml-64 -mb-64"></div>
-    </div>
     <div class="container mx-auto px-4 text-center relative z-10">
         <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Find Your Next <span class="text-indigo-600">Top Talent</span>
         </h1>
@@ -66,8 +66,13 @@
             hiring process with our powerful recruitment platform.</p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
             <a href="career-listings/login"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg">
-                Post a Job - It's Free <i class="fas fa-arrow-right ml-2"></i>
+               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center">
+                Post a Job - It's Free
+                <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                          clip-rule="evenodd"></path>
+                </svg>
             </a>
             <a href="#features"
                class="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300">
@@ -106,7 +111,15 @@
             <!-- Feature 1 -->
             <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div class="w-16 h-16 bg-indigo-50 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-search-plus text-indigo-600 text-2xl"></i>
+                    <svg class="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm7 3a1 1 0 11-2 0 1 1 0 012 0z"
+                              clip-rule="evenodd"></path>
+                        <path fill-rule="evenodd"
+                              d="M12 7a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1V8a1 1 0 011-1z"
+                              clip-rule="evenodd"></path>
+                    </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Smart Candidate Search</h3>
                 <p class="text-gray-600 leading-relaxed">Our AI-powered search analyzes skills and experience to surface
@@ -120,7 +133,10 @@
 
             <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
                 <div class="w-16 h-16 bg-teal-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors duration-300">
-                    <i class="fas fa-users-line text-teal-600 text-2xl"></i>
+                    <svg class="w-8 h-8 text-teal-600" fill="currentColor" viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6.39 8.56C16.71 18.7 14.53 18 12 18s-4.71.7-6.39 1.56C4.61 20.07 4 21.1 4 22.22V23h16v-.78c0-1.12-.61-2.15-1.61-2.66zM18 21c-.52 0-1.08-.16-1.6-.5-.96-.64-2.13-1-3.4-1s-2.44.36-3.4 1c-.52.34-1.08.5-1.6.5H6v-.22c0-.38.2-.72.52-.88C7.71 19.73 9.63 19 12 19s4.29.73 5.48 1.9c.32.16.52.5.52.88V21zM8 7.5c0 .83-.67 1.5-1.5 1.5S5 8.33 5 7.5 5.67 6 6.5 6 8 6.67 8 7.5zm11 5.5c.83 0 1.5-.67 1.5-1.5S19.83 10 19 10s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm.28 3.94c.3-.15.48-.47.48-.82v-.22c0-.52-.18-1.02-.5-1.41-.58-.72-1.45-1.24-2.47-1.46-.24-.05-.48-.06-.72-.05-.36.02-.67.2-.85.45-.18.25-.25.56-.18.86.13.58.47 1.08.94 1.4.47.32 1.04.5 1.63.5h2v.78c0 .14.08.26.19.33.11.07.24.09.37.05.25-.09.51-.2.77-.32.17-.07.34-.15.5-.24.16-.09.3-.2.42-.31z"/>
+                    </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Diversity Insights</h3>
                 <p class="text-gray-600 leading-relaxed">Track and improve team diversity with anonymized candidate
@@ -133,7 +149,10 @@
             <!-- Feature 3 -->
             <div class="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-chart-pie text-blue-600 text-2xl"></i>
+                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 2.07c3.61.45 6.48 3.32 6.93 6.93H13V4.07zM4 12c0-4.06 3.07-7.44 7-7.93v15.86c-3.93-.49-7-3.87-7-7.93zm9 7.93V13h6.93c-.45 3.61-3.32 6.48-6.93 6.93z"/>
+                    </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Advanced Analytics</h3>
                 <p class="text-gray-600 leading-relaxed">Real-time dashboards track application rates, source
@@ -251,8 +270,13 @@
             LTS360 Career Listing.</p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
             <a href="career-listings/login"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg">
-                Get Started - Free<i class="fas fa-arrow-right ml-2"></i>
+               class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center">
+                Get Started - Free
+                <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                          clip-rule="evenodd"></path>
+                </svg>
             </a>
             <a href="#contact"
                class="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition duration-300">
@@ -278,7 +302,10 @@
                     <div class="space-y-4">
                         <div class="flex items-start">
                             <div class="bg-indigo-100 p-3 rounded-lg mr-4">
-                                <i class="fas fa-envelope text-indigo-600"></i>
+                                <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
+                                </svg>
                             </div>
                             <div>
                                 <h4 class="font-medium text-gray-800">Email Us</h4>
@@ -287,7 +314,10 @@
                         </div>
                         <div class="flex items-start">
                             <div class="bg-indigo-100 p-3 rounded-lg mr-4">
-                                <i class="fas fa-phone-alt text-indigo-600"></i>
+                                <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19.23 15.26l-2.54-.29c-.61-.07-1.21.14-1.64.47l-1.84 1.84c-2.83-1.44-5.15-3.75-6.59-6.59l1.85-1.85c.32-.43.54-1.03.47-1.64l-.29-2.52c-.12-1.01-.97-1.77-1.99-1.77H5.03c-1.13 0-2.07.94-2 2.07.53 8.54 7.36 15.36 15.89 15.89 1.13.07 2.07-.87 2.07-2v-1.73c.01-1.01-.75-1.86-1.76-1.98z"/>
+                                </svg>
                             </div>
                             <div>
                                 <h4 class="font-medium text-gray-800">Call Us</h4>
@@ -334,8 +364,9 @@
             <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(1)">
                 <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How can a recruiter sign up
                     for LTS360 Career Listings?</h3>
-                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
-                   id="faq-icon-1"></i>
+                <svg id="faq-icon-1" class="w-5 h-5 text-gray-500 group-hover:text-indigo-600 transition-transform" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
             </button>
             <p class="mt-3 text-gray-600 hidden" id="faq-answer-1">
                 Recruiters can sign up in 2 minutes: Click "Get Started" on our homepage, verify your LTS360 account,
@@ -348,8 +379,9 @@
             <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(2)">
                 <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How does the AI candidate
                     matching work?</h3>
-                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
-                   id="faq-icon-2"></i>
+                <svg id="faq-icon-2" class="w-5 h-5 text-gray-500 group-hover:text-indigo-600 transition-transform" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
             </button>
             <p class="mt-3 text-gray-600 hidden" id="faq-answer-2">
                 Our AI analyzes 20+ factors including skills, experience, project history, and even GitHub activity (for
@@ -362,12 +394,14 @@
             <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(3)">
                 <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How secure is recruiter
                     account?</h3>
-                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
-                   id="faq-icon-3"></i>
+                <svg id="faq-icon-3" class="w-5 h-5 text-gray-500 group-hover:text-indigo-600 transition-transform" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
             </button>
             <p class="mt-3 text-gray-600 hidden" id="faq-answer-3">
                 We implement industry-leading security measures to ensure your data remains protected. Your candidates'
-                information stays confidential and is never shared without consent. </p>
+                information stays confidential and is never shared without consent.
+            </p>
         </div>
 
         <!-- FAQ 4 - Finding Candidates -->
@@ -375,8 +409,9 @@
             <button class="flex justify-between items-center w-full group" onclick="toggleFAQ(4)">
                 <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">How can find the right
                     candidates using LTS360 Career Listings?</h3>
-                <i class="fas fa-chevron-down text-gray-500 group-hover:text-indigo-600 transition-transform"
-                   id="faq-icon-4"></i>
+                <svg id="faq-icon-4" class="w-5 h-5 text-gray-500 group-hover:text-indigo-600 transition-transform" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
             </button>
             <p class="mt-3 text-gray-600 hidden" id="faq-answer-4">
                 Use our <span class="font-medium">Smart Search</span> to filter by skills, location, or experience
@@ -385,6 +420,7 @@
         </div>
     </div>
 </section>
+
 
 <script>
     function toggleFAQ(id) {

@@ -17,7 +17,7 @@ from django.utils.timezone import now
 from job_portal import settings
 from .forms import JobPostingForm
 from .forms import OrganizationProfileForm, RecruiterProfileForm, RecruiterSettingsForm
-from .models import OrganizationProfile, RecruiterProfile, Department, JobIndustry, Role, Skills, \
+from .models import OrganizationProfile, RecruiterProfile, Department, Industry, Role, Skills, \
     RecruiterSettings, Plan, SalaryMarket, Education
 
 
@@ -28,7 +28,7 @@ def index(request):
 # Function to generate tokens
 def generate_ar_tokens(user_id, email, role='User', sign_up_method='web'):
     user_id_str = str(user_id)
-    now = datetime.datetime.now(datetime.timezone.utc)
+    issued_at = datetime.datetime.now(datetime.timezone.utc)
     # Create the payload for the access token
     access_payload = {
         'sub': user_id_str,  # subject (user's unique identifier)
@@ -36,8 +36,8 @@ def generate_ar_tokens(user_id, email, role='User', sign_up_method='web'):
         'email': email,
         'role': role,
         'signUpMethod': sign_up_method,
-        'iat': now,  # issued at time
-        'exp': now + datetime.timedelta(minutes=15)  # expire in 1 hour
+        'iat': issued_at,  # issued at time
+        'exp': issued_at + datetime.timedelta(minutes=15)  # expire in 15 minutes
     }
 
     # Create the access token (short-lived)
@@ -50,8 +50,8 @@ def generate_ar_tokens(user_id, email, role='User', sign_up_method='web'):
         'email': email,
         'role': role,
         'signUpMethod': sign_up_method,
-        'iat': now,  # issued at time
-        'exp': now + datetime.timedelta(days=90)  # expire in 30 days
+        'iat': issued_at,  # issued at time
+        'exp': issued_at + datetime.timedelta(days=90)  # expire in 90 days
     }
 
     # Create the refresh token (long-lived)
@@ -157,18 +157,17 @@ def login_view(request):
                         response.set_cookie(
                             'access_token',
                             access_token,
-                            httponly=True,  # Prevent JavaScript access to the cookie
-                            secure=False,
-                            samesite='Strict',  # Prevent the cookie from being sent cross-site
+                            httponly=True,
+                            secure=settings.SESSION_COOKIE_SECURE,
+                            samesite='Strict',
                             max_age=15 * 60  # 15 minutes in seconds
                         )
-
                         response.set_cookie(
                             'refresh_token',
                             refresh_token,
-                            httponly=True,  # Prevent JavaScript access to the cookie
-                            secure=False,
-                            samesite='Strict',  # Prevent the cookie from being sent cross-site
+                            httponly=True,
+                            secure=settings.SESSION_COOKIE_SECURE,
+                            samesite='Strict',
                             max_age=90 * 24 * 60 * 60  # 90 days in seconds
                         )
 
@@ -182,7 +181,7 @@ def login_view(request):
                     error_message = response_error.get('message')
                     errors.append(error_message if error_message else "Something went wrong")
 
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException:
                 errors.append(f"Something went wrong")
 
         else:
@@ -249,17 +248,18 @@ def login_view(request):
                         response.set_cookie(
                             'access_token',
                             access_token,
-                            httponly=True,  # Prevent JavaScript access to the cookie
-                            secure=False,
-                            samesite='Strict'  # Prevent the cookie from being sent cross-site
+                            httponly=True,
+                            secure=settings.SESSION_COOKIE_SECURE,
+                            samesite='Strict',
+                            max_age=15 * 60  # 15 minutes in seconds
                         )
-
                         response.set_cookie(
                             'refresh_token',
                             refresh_token,
-                            httponly=True,  # Prevent JavaScript access to the cookie
-                            secure=False,
-                            samesite='Strict'  # Prevent the cookie from being sent cross-site
+                            httponly=True,
+                            secure=settings.SESSION_COOKIE_SECURE,
+                            samesite='Strict',
+                            max_age=90 * 24 * 60 * 60  # 90 days in seconds
                         )
 
                         # Redirect after setting cookies
@@ -272,7 +272,7 @@ def login_view(request):
                     error_message = response_error.get('message')
                     errors.append(error_message if error_message else "Something went wrong")
 
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException:
                 errors.append(f"Something went wrong")
 
     return render(request, "job_portal/login.html", {'errors': errors})
@@ -309,7 +309,7 @@ def dashboard(request):
     )
 
     # Filter JobApplications for those jobs and date range
-    applicants = JobApplication.objects.filter(
+    applicants = Application.objects.filter(
         job_listing__in=jobs,
         applied_at__date__range=[start_date, end_date]
     )
@@ -385,7 +385,7 @@ def dashboard(request):
     )
 
     # Get applications in date range
-    applications_for_activity = JobApplication.objects.filter(
+    applications_for_activity = Application.objects.filter(
         job_listing__posted_by=request.user.profile,
         applied_at__date__range=[start_date, end_date]
     )
@@ -432,7 +432,7 @@ def dashboard(request):
 
 def add_new_job_listing(request):
     # For testing purposes, manually set the user_id (e.g., user_id=1 or another valid test ID)
-
+    SalaryMarket.create_default_salary_markets()
     # Check if the user has a company profile
     try:
         company_profile = OrganizationProfile.objects.get(user=request.user.profile)  # Use test_user_id here
@@ -454,15 +454,12 @@ def add_new_job_listing(request):
     currency_type = recruiter_settings_db.currency_type
     salary_market = SalaryMarket.objects.get(currency_type=currency_type)
 
-
-
     salary_markers = {
         'start':  salary_market.format_currency_salary_start(),
         'middle': salary_market.format_currency_salary_middle(),  # 500K
         'end': salary_market.format_currency_salary_end(),  # 1M
         'currency_symbol': salary_market.currency_symbol()
     }
-
 
     # Proceed with the job posting form
     if request.method == 'POST':
@@ -578,7 +575,7 @@ def edit_job_listing(request, job_id):
             return redirect('edit_job_listing', job_id=job_id)  # Redirect after successful edit
         else:
             # In case of form errors, the form will be re-rendered with error messages
-            return render(request, 'job_portal/edit_job_listing.html',
+            return render(request, 'job_portal/edit_career_listing.html',
                           {'form': form,
                            'job_posting': job_posting,
                            'recruiter_profile_complete': recruiter_profile_complete,
@@ -588,7 +585,7 @@ def edit_job_listing(request, job_id):
         form = JobPostingForm(instance=job_posting, currency_type=currency_type, user=request.user.profile)  # Pre-populate the form with the existing job data
 
 
-    return render(request, 'job_portal/edit_job_listing.html', {'form': form, 'job_posting': job_posting,
+    return render(request, 'job_portal/edit_career_listing.html', {'form': form, 'job_posting': job_posting,
                                                                 'recruiter_profile_complete': recruiter_profile_complete,
                                                                 'salary_markers': salary_markers
                                                                 })
@@ -737,7 +734,7 @@ def job_listing_applicants(request, job_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'job_portal/job_listing_applicants.html', {
+    return render(request, 'job_portal/listing_applicants.html', {
         'job': job_posting,
         'applicants': page_obj,  # Pass paginated applicants
         'page_obj': page_obj  # Pass pagination object to template
@@ -749,7 +746,7 @@ def manage_applicant(request, job_id, applicant_id):
     job_posting = get_object_or_404(JobPosting, pk=job_id)
 
     # Query the JobApplication model to get the application for this job by this user
-    applicant = get_object_or_404(JobApplication, user_id=applicant_id, job_listing=job_posting)
+    applicant = get_object_or_404(Application, user_id=applicant_id, job_listing=job_posting)
 
     # Check if applicant is rejected
     is_rejected = applicant.is_rejected
@@ -797,7 +794,7 @@ def manage_applicant(request, job_id, applicant_id):
 
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import UpdateStatusForm
-from .models import JobPosting, JobApplication
+from .models import JobPosting, Application
 
 def manage_applicant_update_status(request, job_id, applicant_id):
     # Define your status workflow with order
@@ -813,7 +810,7 @@ def manage_applicant_update_status(request, job_id, applicant_id):
     job_posting = get_object_or_404(JobPosting, pk=job_id)
 
     # Get the applicant's job application
-    applicant = get_object_or_404(JobApplication, user_id=applicant_id, job_listing=job_posting)
+    applicant = get_object_or_404(Application, user_id=applicant_id, job_listing=job_posting)
 
     # Get the current status order of the applicant
     current_status = applicant.status
@@ -853,7 +850,7 @@ def manage_applicant_reject_applicant(request, job_id, applicant_id):
     if request.method == 'POST':
         # Get the job posting and the applicant's job application
         job_posting = get_object_or_404(JobPosting, pk=job_id)
-        applicant = get_object_or_404(JobApplication, user_id=applicant_id, job_listing=job_posting)
+        applicant = get_object_or_404(Application, user_id=applicant_id, job_listing=job_posting)
 
         # Update the status to 'rejected'
         applicant.reject()
@@ -867,7 +864,7 @@ def manage_applicant_mark_top_applicant(request, job_id, applicant_id):
     if request.method == 'POST':
         # Get the job posting and the applicant's job application
         job_posting = get_object_or_404(JobPosting, pk=job_id)
-        applicant = get_object_or_404(JobApplication, user_id=applicant_id, job_listing=job_posting)
+        applicant = get_object_or_404(Application, user_id=applicant_id, job_listing=job_posting)
         applicant.update_top_applicant(False if applicant.is_top_applicant else True)
 
         return redirect('manage_applicant', job_id=job_posting.id, applicant_id=applicant.id)
@@ -875,7 +872,7 @@ def manage_applicant_mark_top_applicant(request, job_id, applicant_id):
         return JsonResponse({'message': 'Invalid method'}, status=405)
 
 
-def company_profile(request):
+def company_profile_view(request):
     user = request.user  # Get the logged-in user
     recruiter_profile = user.profile  # This gets the related RecruiterProfile instance
     # Retrieve the company profile for the logged-in user if it exists
@@ -905,7 +902,7 @@ def company_profile(request):
                   {'form': form, 'is_recruiter_profile_complete': recruiter_profile.is_profile_complete})
 
 
-def recruiter_profile(request):
+def recruiter_profile_view(request):
     user = request.user  # Get the logged-in user
     recruiter_profile = user.profile  # This gets the related RecruiterProfile instance
 
@@ -972,8 +969,7 @@ def account(request):
 
         # Return the template response
         return render(request, 'job_portal/account.html', response_data)
-
-    except Exception as e:
+    except Exception:
         # Catch any database or other exceptions
         return render(request, 'job_portal/account.html')
 
@@ -1120,7 +1116,7 @@ class DepartmentAutocomplete(autocomplete.Select2QuerySetView):
 
 class IndustryAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = JobIndustry.objects.all()
+        qs = Industry.objects.all()
 
         if self.q:
             qs = qs.filter(

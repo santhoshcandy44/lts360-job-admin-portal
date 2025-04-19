@@ -9,13 +9,13 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import MaxLengthValidator, EmailValidator, \
-    RegexValidator, FileExtensionValidator, MinLengthValidator
+    RegexValidator, FileExtensionValidator, MinLengthValidator, URLValidator
 from html5lib import serialize, parseFragment
 from tinymce.widgets import TinyMCE
 
 from job_portal_app.image_utils import compress_image
 from .models import JobPosting, OrganizationProfile, RecruiterRoleEnum, COUNTRY_CHOICES, STATE_CHOICES, \
-    JobApplication, Department, JobIndustry, Skills, RecruiterSettings, Role, SalaryMarket, Education
+    Application, Department, Industry, Skills, RecruiterSettings, Role, SalaryMarket, Education
 
 HIGHLIGHTS_CHOICES = [
     ('free_food', 'Free Food'),
@@ -27,21 +27,20 @@ HIGHLIGHTS_CHOICES = [
     ('flexible', 'Flexible Hours'),
 ]
 
-
 class JobPostingForm(forms.ModelForm):
     title = forms.CharField(
-        min_length=25,
+        min_length=15,
         max_length=50,
         widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'placeholder': 'e.g. Senior Software Engineer',
-            'minlength': '30',
+            'minlength': '15',
             'maxlength': '50',
             'id': 'id_title',
 
         }),
         validators=[
-            MinLengthValidator(30),
+            MinLengthValidator(15),
             MaxLengthValidator(50),
             RegexValidator(
                 regex='^[a-zA-Z0-9\s\-\&\.\,]+$',  # You can adjust the allowed characters as per your needs
@@ -73,7 +72,7 @@ class JobPostingForm(forms.ModelForm):
     )
 
     company = forms.ModelChoiceField(
-        queryset=OrganizationProfile.objects.none(),  # Placeholder, override in __init__
+        queryset=OrganizationProfile.objects.none(),
         empty_label="Select a company",
 
         widget=forms.Select(
@@ -87,20 +86,20 @@ class JobPostingForm(forms.ModelForm):
     )
 
     description = forms.CharField(
-        max_length=2000,
+        max_length=3000,
+        min_length=500,
         widget=TinyMCE(attrs={
             'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
             'placeholder': 'Describe the job responsibilities and requirements...',
-            'maxlength': '1000',
+            'minLength':'500',
+            'maxlength': '3000',
             'id': 'id_description',
             'oninput': 'autoResize(this)',
-            'cols': 100,
-
             'style': 'min-height: 8rem; overflow-y: hidden; resize: none;'
         }, ),
         validators=[
-            MinLengthValidator(50),  # Ensure the description is at least 50 characters
-            MaxLengthValidator(1000)  # Ensure the description does not exceed 2000 characters
+            MinLengthValidator(500),  # Ensure the description is at least 50 characters
+            MaxLengthValidator(3000)  # Ensure the description does not exceed 2000 characters
         ],
         help_text="Please provide a detailed description (between 50 and 2000 characters).",
         required=True
@@ -386,13 +385,13 @@ class JobPostingForm(forms.ModelForm):
                 if hasattr(self.instance, 'industry_type'):
                     if self.data:
                         all_choices = [self.data['industry_type']] if self.data['industry_type'] else [] + list(
-                            JobIndustry.objects.values_list('name', flat=True))
+                            Industry.objects.values_list('name', flat=True))
                         industry_type_choices = [(industry_type, industry_type) for industry_type in all_choices]
                         self.fields['industry_type'].choices = industry_type_choices
 
                     else:
                         all_choices = [self.instance.industry_type] if self.instance.industry_type else [] + list(
-                            JobIndustry.objects.values_list('name', flat=True))
+                            Industry.objects.values_list('name', flat=True))
                         industry_type_choices = [(industry_type, industry_type) for industry_type in all_choices]
                         self.fields['industry_type'].choices = industry_type_choices
 
@@ -486,6 +485,8 @@ class JobPostingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
+        print(self.cleaned_data.get('description', ''))
+
         def normalize_html(html):
             """Remove excess whitespace for fair comparison."""
             return re.sub(r'\s+', ' ', html).strip()
@@ -497,9 +498,11 @@ class JobPostingForm(forms.ModelForm):
         if self.instance.status != 'published':
             raise ValidationError('Job listing is not published to update')
 
+
         description = self.cleaned_data.get('description', '').strip()
 
-        ALLOWED_TAGS = ['p', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li']
+
+        ALLOWED_TAGS = ['br', 'p', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li']
         ALLOWED_ATTRIBUTES = {}  # No additional attributes allowed
         ALLOWED_PROTOCOLS = []  # No hyperlinks needed
 
@@ -570,10 +573,9 @@ class JobPostingForm(forms.ModelForm):
 
         return cleaned_data
 
-
 class UpdateStatusForm(forms.ModelForm):
     class Meta:
-        model = JobApplication
+        model = Application
         fields = ['status']
 
     STATUS_CHOICES = [
@@ -586,7 +588,6 @@ class UpdateStatusForm(forms.ModelForm):
     ]
 
     status = forms.ChoiceField(choices=STATUS_CHOICES, required=True)
-
 
 class OrganizationProfileForm(forms.ModelForm):
 
@@ -620,8 +621,22 @@ class OrganizationProfileForm(forms.ModelForm):
         validators=[
             EmailValidator(message="Please enter a valid email address")
         ],
-        help_text="Official company email address",
+        help_text="Enter company contact email address",
         required=True
+    )
+
+    website = forms.URLField(
+        widget=forms.URLInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200',
+            'placeholder': 'https://www.yourcompany.com',
+            'id': 'id_website',
+            'autocomplete': 'url',
+        }),
+        validators=[
+            URLValidator(message="Please enter a valid website URL")
+        ],
+        help_text="Enter the company website URL",
+        required=False
     )
 
     organization_address = forms.CharField(
@@ -714,7 +729,10 @@ class OrganizationProfileForm(forms.ModelForm):
         model = OrganizationProfile
         fields = [
             'organization_name', 'organization_address',
-            'email', 'country', 'city', 'state', 'postal_code', 'logo'
+            'email',
+            'website',
+
+            'country', 'city', 'state', 'postal_code', 'logo'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -760,7 +778,7 @@ class OrganizationProfileForm(forms.ModelForm):
                         output_format='JPEG'  # or 'PNG' if you prefer
                     )
                     return compressed_logo
-                except ValueError as e:
+                except ValueError:
                     raise forms.ValidationError("Failed to upload image")
 
         return logo
@@ -780,8 +798,8 @@ class OrganizationProfileForm(forms.ModelForm):
 
         return cleaned_data
 
-
 from django import forms
+
 from django.core.validators import (
     MinValueValidator,
     MaxValueValidator,
@@ -791,7 +809,6 @@ from django.core.validators import (
 )
 from phonenumber_field.formfields import PhoneNumberField
 from .models import RecruiterProfile
-
 
 class RecruiterProfileForm(forms.ModelForm):
     first_name = forms.CharField(
@@ -993,11 +1010,10 @@ class RecruiterProfileForm(forms.ModelForm):
                         output_format='JPEG'  # or 'PNG' if you prefer
                     )
                     return compressed_logo
-                except ValueError as e:
+                except ValueError:
                     raise forms.ValidationError("Failed to upload image")
 
         return picture
-
 
 class RecruiterSettingsForm(forms.ModelForm):
     class Meta:

@@ -99,7 +99,6 @@ class RecruiterRoleEnum(Enum):
 def get_default_trial_end_date():
     return timezone.now() + timedelta(days=90)
 
-
 # RecruiterProfile model
 class RecruiterProfile(models.Model):
     user = models.OneToOneField('ExternalLinkUser', on_delete=models.CASCADE, related_name='profile')
@@ -149,13 +148,6 @@ class RecruiterProfile(models.Model):
         return all(required_fields)
 
 
-def get_user_profile_upload_path(instance, filename):
-    """
-    Generate the upload path for the organization logo based on the organization ID.
-    """
-    return os.path.join('users', str(instance.user_id), 'profile', filename)
-
-
 def generate_unique_11_digit_id():
     while True:
         uid = random.randint(10_000_000_000, 99_999_999_999)  # 11-digit number
@@ -166,33 +158,27 @@ class UserProfile(models.Model):
     id = models.BigIntegerField(primary_key=True, default=generate_unique_11_digit_id, unique=True)
 
     # Inherit from UserProfile if needed, or just copy relevant fields to make StudentProfile standalone
-    external_user_id = models.CharField(max_length=255)  # External ID, like social media or university ID
+    external_user_id = models.BigIntegerField(unique=True)
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    profile_picture = models.ImageField(upload_to=get_user_profile_upload_path, blank=True, null=True)
+    profile_picture = models.TextField(blank=True, null=True)
     email = models.EmailField()
 
+    intro = models.CharField(max_length=500)
+
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('others', 'Others'),
+    ]
+    gender = models.CharField( max_length=7, choices=GENDER_CHOICES,   blank=True, null=True )
+
     # Phone number, maybe verified?
-    phone = PhoneNumberField()
-
-    # Educational Background
-    education_level = models.CharField(max_length=100, choices=[('undergraduate', 'Undergraduate'),
-                                                                ('graduate', 'Graduate'),
-                                                                ('postgraduate', 'Postgraduate')],
-                                       default='undergraduate')
-    institution = models.CharField(max_length=255)
-    graduation_year = models.IntegerField()
-    current_position = models.CharField(max_length=255)
-    years_of_experience = models.FloatField(max_length=255)
-
-    resume_download_url = models.URLField(blank=True, null=True)  # URL for the resume file
-    resume_type = models.CharField(max_length=255, blank=True, null=True)  # Type of resume (e.g., pdf, doc)
-    portfolio_url = models.URLField(blank=True, null=True)  # Optional: A link to an online portfolio, if applicable
-    skills = models.CharField(max_length=500, blank=True, null=True)  # Skills relevant to the job
+    phone = PhoneNumberField(blank=True, null=True)
 
     # The student applying for a job
-    applied_jobs = models.ManyToManyField('JobPosting', through='JobApplication', related_name='students')
+    applied_jobs = models.ManyToManyField('JobPosting', through='Application', related_name='students')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -201,7 +187,7 @@ class UserProfile(models.Model):
     is_verified = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.education_level}"
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         db_table = 'user_profile'
@@ -219,13 +205,125 @@ class UserProfile(models.Model):
             self.first_name,
             self.last_name,
             self.email,
-            self.phone,
-            self.education_level,
-            self.institution,
-            self.graduation_year,
-            self.skills
+            self.phone
         ]
         return all(required_fields)
+
+
+# Education Model
+class UserProfileEducation(models.Model):
+    user_profile = models.OneToOneField('UserProfile', related_name='education', on_delete=models.CASCADE)
+
+    # The name of the organization (institution)
+    organization_name = models.CharField(max_length=255)
+
+    # The field of study (major/subject)
+    field_of_study = models.CharField(max_length=255)
+
+    # The start date of the education program
+    start_date = models.DateField()
+
+    # The end date or expected graduation date
+    end_date = models.DateField(null=True, blank=True)
+
+    # The grade achieved in the education program (e.g., GPA, Percentage)
+    grade = models.DecimalField(max_digits=5, decimal_places=1, null=True)
+
+    # Whether the user is currently studying or has completed the education
+    currently_studying = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.organization_name} - {self.field_of_study}"
+
+    class Meta:
+        db_table = 'user_profile_education_info'
+
+class UserProfileExperience(models.Model):
+    user_profile = models.ForeignKey('UserProfile', related_name='experience', on_delete=models.CASCADE)
+
+    JOB_TYPE_CHOICES = [
+        ('full_time', 'Full Time'),
+        ('part_time', 'Part Time'),
+        ('contract', 'Contract'),
+        ('intern', 'Internship'),
+        ('freelance', 'Freelance'),
+    ]
+
+    job_title = models.CharField(max_length=255, null=True)
+    employment_type = models.CharField(max_length=50, choices=JOB_TYPE_CHOICES,  null=True)
+    organization = models.CharField(max_length=255,  null=True)
+    current_working_here = models.BooleanField(default=False,  null=True)
+    experienced = models.BooleanField(default=True)
+    start_date = models.DateField( null=True)
+    end_date = models.DateField(null=True, blank=True)  # Nullable if currently working
+    location = models.CharField(max_length=255,  null=True)
+
+    class Meta:
+        db_table = 'user_profile_experience'
+
+    def __str__(self):
+        return f"{self.job_title} at {self.organization}"
+
+class UserProfileSkill(models.Model):
+    user_profile = models.ForeignKey('UserProfile', related_name='skill', on_delete=models.CASCADE)
+    skill = models.CharField(max_length=100)  # e.g., "Python"
+    skill_code = models.CharField(max_length=50)  # e.g., "PY001"
+
+    class Meta:
+        db_table = 'user_profile_skill'
+
+    def __str__(self):
+        return f"{self.skill} ({self.skill_code}), Language: {self.language_code}, Proficiency: {self.proficiency}"
+
+class UserProfileLanguage(models.Model):
+    user_profile = models.ForeignKey('UserProfile', related_name='langauge', on_delete=models.CASCADE)
+    language = models.CharField(max_length=100)  # e.g., "Python"
+    language_code = models.CharField(max_length=50, null=True, blank=True)  # e.g., "EN" for English
+    proficiency = models.CharField(max_length=50, null=True, blank=True)  # e.g., "Intermediate", "Fluent"
+    proficiency_code = models.CharField(max_length=50, null=True, blank=True)  # e.g., "EN" for English
+
+    class Meta:
+        db_table = 'user_profile_language'
+
+    def __str__(self):
+        return f"Language: {self.langauge}, Proficiency: {self.proficiency}"
+
+class UserProfileResume(models.Model):
+    user_profile = models.OneToOneField(
+        'UserProfile',
+        related_name='resume',
+        on_delete=models.CASCADE,
+        unique=True
+    )
+    resume_download_url = models.CharField(max_length=255)
+    resume_file_name = models.CharField(max_length=255)
+    resume_size = models.CharField(max_length=50)
+    resume_type = models.CharField(max_length=50)
+    last_used = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'user_profile_resume'
+
+    def __str__(self):
+        return f"Resume ({self.resume_type}, {self.resume_size}) - {self.resume_download_url}"
+
+class UserProfileCertificate(models.Model):
+    user_profile = models.ForeignKey(
+        'UserProfile',
+        related_name='certificate',
+        on_delete=models.CASCADE
+    )
+    issued_by =  models.CharField(max_length=50)
+    certificate_download_url = models.CharField(max_length=255)
+    certificate_file_name = models.CharField(max_length=255)
+    certificate_size = models.CharField(max_length=50)
+    certificate_type = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'user_profile_certificate'
+
+    def __str__(self):
+        return f"Resume ({self.certificate_type}, {self.certificate_size}) - {self.certificate_download_url}"
 
 
 class OrganizationProfile(models.Model):
@@ -235,6 +333,9 @@ class OrganizationProfile(models.Model):
     logo = models.ImageField(upload_to=get_logo_upload_path, blank=True, null=True)
     email = models.EmailField()
     organization_address = models.CharField(max_length=255)
+    website = models.URLField(
+        max_length=200,
+    )
     country = models.CharField(
         max_length=2,
         choices=COUNTRY_CHOICES,
@@ -285,14 +386,13 @@ def generate_unique_10_digit_id():
         if not JobPosting.objects.filter(id=uid).exists():
             return uid
 
-
 class JobPosting(models.Model):
     id = models.BigIntegerField(primary_key=True, default=generate_unique_10_digit_id, unique=True)
 
     title = models.CharField(max_length=100)
 
     work_mode = models.CharField(max_length=50,
-                                 choices=[('remote', 'Remote'), ('office', 'Office'), ('hybrid', 'Hybrid')],
+                                 choices=[('remote', 'Remote'), ('office', 'Office'), ('hybrid', 'Hybrid'), ['flexible', 'Flexible']],
                                  default='office', blank=False)
     location = models.CharField(max_length=100)
 
@@ -306,6 +406,7 @@ class JobPosting(models.Model):
                                        choices=[('fresher', 'Fresher'), ('min_max', 'Min-Max Experience'),
                                                 ('fixed', 'Fixed Experience')],
                                        default='fresher', blank=False)
+
     experience_range_min = models.IntegerField(default=0)
     experience_range_max = models.IntegerField(default=0)
     experience_fixed = models.IntegerField(default=0)
@@ -321,12 +422,15 @@ class JobPosting(models.Model):
     department = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
     employment_type = models.CharField(max_length=50, choices=[('full_time', 'Full Time'), ('part_time', 'Part Time'),
-                                                               ('contract', 'Contract')], default='full_time',
+                                                               ('contract', 'Contract'), ('internship', 'Internship')], default='full_time',
                                        blank=False)
     vacancies = models.IntegerField(default=1)
 
     highlights = models.JSONField(default=list,
                                   help_text="List of selected job perks")
+
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     posted_at = models.DateTimeField(auto_now_add=True)
     posted_by = models.ForeignKey('RecruiterProfile', on_delete=models.CASCADE, related_name='recruiter_user_profile')
@@ -516,11 +620,11 @@ class JobPosting(models.Model):
 def generate_unique_8_digit_id():
     while True:
         uid = random.randint(10_000_000, 99_999_999)  # 8-digit number
-        if not JobApplication.objects.filter(id=uid).exists():
+        if not Application.objects.filter(id=uid).exists():
             return uid
 
 
-class JobApplication(models.Model):
+class Application(models.Model):
     id = models.BigIntegerField(primary_key=True, default=generate_unique_8_digit_id, unique=True)
     user = models.ForeignKey('UserProfile', on_delete=models.CASCADE)  # Link to StudentProfile (ForeignKey)
     job_listing = models.ForeignKey('JobPosting', on_delete=models.CASCADE,
@@ -552,7 +656,7 @@ class JobApplication(models.Model):
 
     def clean(self):
         # Custom validation to prevent duplicate applications
-        if JobApplication.objects.filter(
+        if Application.objects.filter(
                 user=self.user,
                 job_listing=self.job_listing
         ).exclude(pk=self.pk).exists():
@@ -585,7 +689,7 @@ class JobApplication(models.Model):
         self.save()
 
 
-class JobIndustry(models.Model):
+class Industry(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=15, unique=True)
     description = models.TextField(blank=True)
@@ -628,7 +732,6 @@ class JobIndustry(models.Model):
                 code=industry['code'],
                 defaults={'description': f"{industry['code']} - {industry['name']} industry"}
             )
-
 
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -674,7 +777,6 @@ class Department(models.Model):
                 code=dept['code'],
                 defaults={'description': f"{dept['code']} Department"}
             )
-
 
 class Role(models.Model):
     name = models.CharField(max_length=100)
@@ -816,7 +918,6 @@ class Role(models.Model):
                         code=role_code,
                     )
 
-
 class Education(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(
@@ -896,7 +997,6 @@ class Education(models.Model):
                 code=edu['code'],
                 defaults={'description': f"{edu['name']} Education"}
             )
-
 
 class Skills(models.Model):
     name = models.CharField(max_length=100)  # Name of the skill
@@ -1700,7 +1800,6 @@ class Skills(models.Model):
                         description=skill.get('description', '')
                     )
 
-
 class SalaryMarket(models.Model):
     CURRENCY_CHOICES = [
         ('INR', 'Indian Rupee'),
@@ -1797,8 +1896,8 @@ class SalaryMarket(models.Model):
     def format_currency_salary_end(self):
         return self._format_salary(self.salary_end)
 
-
 class RecruiterSettings(models.Model):
+
     CURRENCY_CHOICES = [
         ('USD', 'US Dollar'),
         ('EUR', 'Euro'),
@@ -1840,7 +1939,6 @@ class RecruiterSettings(models.Model):
 
     def __str__(self):
         return f"Settings for {self.user.first_name} {self.user.last_name}"
-
 
 class Plan(models.Model):
     name = models.CharField(max_length=100)

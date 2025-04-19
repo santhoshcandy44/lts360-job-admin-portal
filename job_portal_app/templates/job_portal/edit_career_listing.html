@@ -7,10 +7,10 @@
 
 {% load static %}
 
-<link href="{% static 'job_portal/styles/select2-tailwind.css' %}" rel="stylesheet"/>
-{{ form.media.css }}
+
 <style>
-input[type="date"] {
+
+     input[type="date"] {
     color: #000000 !important;
 }
 
@@ -19,9 +19,7 @@ input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-day-field {
     color: #000000 !important;
 }
-</style>
 
- <style>
         .active-format {
             background-color: #e5e7eb;
             color: #111827;
@@ -44,7 +42,12 @@ input[type="date"]::-webkit-datetime-edit-day-field {
             margin: 0;
             display: inline;
         }
+
+
     </style>
+
+<link href="{% static 'job_portal/styles/select2-tailwind.css' %}" rel="stylesheet"/>
+{{ form.media.css }}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 {{ form.media.js }}
 
@@ -53,9 +56,6 @@ input[type="date"]::-webkit-datetime-edit-day-field {
 {% block content %}
 
 <div class="max-w-4xl mx-auto py-8 px-2">
-
-
-
 
     <!-- Error Messages -->
     {% if form.errors %}
@@ -1046,7 +1046,6 @@ input[type="date"]::-webkit-datetime-edit-day-field {
        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
 
 
-
           </div>
 
           <div class="flex justify-end space-x-3 mt-6">
@@ -1082,7 +1081,7 @@ input[type="date"]::-webkit-datetime-edit-day-field {
 <script>
 
 
-    function closeModal() {
+function closeModal() {
   // Hide the modal
   document.getElementById('extendModal').classList.add('hidden');
 
@@ -1106,21 +1105,29 @@ function openModal() {
         textarea.style.height = textarea.scrollHeight + "px"; // Expand dynamically
     }
 
-         tinymce.init({
+tinymce.init({
     selector: '#id_description',
+      content_style: `
+    .mce-content-body p {
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    }`,
     branding: false,
     plugins: 'advlist lists autoresize',
     toolbar: 'bold italic underline | bullist numlist',
     promotion: false,
-    menubar: false, // Hides the top menu
-    resize: false,   // Prevents resizing
- min_height: 400,
-     statusbar: false,
+    menubar: false,
+    resize: false,
+    min_height: 400,
+    statusbar: false,
     formats: {
         underline: { inline: 'u', exact: true }
     },
     invalid_elements: 'span,div,script,img,table,blockquote',
-    valid_elements: 'p,strong/b,em/i,u,ul,ol,li',
+    valid_elements: 'br,p,strong/b,em/i,u,ul,ol,li',
+    newline_behavior: 'linebreak', // Makes Enter insert a <br> instead of a new paragraph
+    remove_trailing_brs: false   // Keeps any trailing <br> tags intact
+
 });
 
 
@@ -1332,11 +1339,6 @@ toggleSalaryFields(); // Initial state based on checkbox
         });
     });
 
-
-
-
-
-
 });
 
 
@@ -1421,12 +1423,6 @@ toggleSalaryFields(); // Initial state based on checkbox
         }
     });
 
-      tinymce.init({
-            selector: '#id_description',  // Match the field's ID
-            plugins: 'advlist autolink lists link charmap print preview anchor',
-            toolbar: 'bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
-            height: 300,
-        });
 
 </script>
 

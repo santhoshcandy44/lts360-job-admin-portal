@@ -69,8 +69,8 @@ urlpatterns = [
         'career-listings/received-applications/<int:job_id>/applications/applicant/<int:applicant_id>/change-status-top-applicant',
         views.manage_applicant_mark_top_applicant, name='manage_applicant_mark_top_applicant'),
 
-    path('career-listings/company-profile/', views.company_profile, name='company_profile'),
-    path('career-listings/recruiter-profile/', views.recruiter_profile, name='recruiter_profile'),
+    path('career-listings/company-profile/', views.company_profile_view, name='company_profile'),
+    path('career-listings/recruiter-profile/', views.recruiter_profile_view, name='recruiter_profile'),
     path('career-listings/recruiter-settings/', views.recruiter_settings, name='recruiter_settings'),
 
     path('career-listings/account/', views.account, name='account'),

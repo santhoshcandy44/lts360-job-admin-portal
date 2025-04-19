@@ -26,10 +26,10 @@ input[type="date"]::-webkit-datetime-edit-day-field {
 
 
 {% block content %}
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
 <!-- Final CTA -->
 {% if can_post_job %}
-<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
         <!-- Error Messages -->
     {% if form.errors %}
@@ -771,7 +771,6 @@ input[type="date"]::-webkit-datetime-edit-day-field {
 
     </form>
 
-</div>
 {% else %}
 <div class="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Job Listing Requirements</h2>
@@ -869,6 +868,9 @@ input[type="date"]::-webkit-datetime-edit-day-field {
     </div>
 </div>
 {% endif %}
+
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -881,21 +883,24 @@ input[type="date"]::-webkit-datetime-edit-day-field {
     }
 
 
-             tinymce.init({
+   tinymce.init({
     selector: '#id_description',
     branding: false,
-    plugins: 'advlist lists autoresize',
+    plugins: 'lists advlist lists autoresize',
     toolbar: 'bold italic underline | bullist numlist',
     promotion: false,
-    menubar: false, // Hides the top menu
-    resize: false,   // Prevents resizing
- min_height: 400,
-     statusbar: false,
+    menubar: false,
+    resize: false,
+    min_height: 400,
+    statusbar: false,
     formats: {
         underline: { inline: 'u', exact: true }
     },
-    invalid_elements: 'span,div,script,img,table,blockquote',
-    valid_elements: 'p,strong/b,em/i,u,ul,ol,li',
+   paste_as_text: true,            // Forces paste to behave as plain text
+   forced_root_block: false,       // Prevents wrapping everything in <p>
+   content_style: "white-space: pre-line;", // Keeps line breaks
+   invalid_elements: 'span,div,script,img,table,blockquote',
+   valid_elements: 'p,strong/b,em/i,u,ul,ol,li,br',
 });
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -15,7 +15,7 @@
     {% if is_recruiter_profile_complete %}
     <!-- Page Header -->
     <div class="mb-4">
-        <h1 class="text-3xl font-bold text-gray-900">Recruiter Profile</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Organization Profile</h1>
         <p class="text-sm text-gray-600 mt-2">These details will be shown on your company profile.</p>
     </div>
 
@@ -80,6 +80,22 @@
                 {% endif %}
                 {% if form.email.errors %}
                 <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+
+                     <!-- Website -->
+            <div class="space-y-2">
+                <label for="{{ form.website.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ form.website.label }}
+                    {% if form.website.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                {{ form.website }}
+                {% if form.website.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.website.help_text }}</p>
+                {% endif %}
+                {% if form.website.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.website.errors.0 }}</p>
                 {% endif %}
             </div>
 
