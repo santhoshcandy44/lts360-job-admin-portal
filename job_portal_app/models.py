@@ -616,13 +616,11 @@ class JobPosting(models.Model):
             self.slug = f"{base_slug}-{self.id}"
         super().save(*args, **kwargs)
 
-
 def generate_unique_8_digit_id():
     while True:
         uid = random.randint(10_000_000, 99_999_999)  # 8-digit number
         if not Application.objects.filter(id=uid).exists():
             return uid
-
 
 class Application(models.Model):
     id = models.BigIntegerField(primary_key=True, default=generate_unique_8_digit_id, unique=True)
@@ -688,7 +686,6 @@ class Application(models.Model):
         self.is_top_applicant = is_top_applicant
         self.save()
 
-
 class Industry(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=15, unique=True)
@@ -703,27 +700,29 @@ class Industry(models.Model):
 
     @classmethod
     def create_default_job_industries(cls):
+
         default_job_industries = [
-            {'name': 'Information Technology', 'code': 'IT-1A2B3'},
-            {'name': 'Tech', 'code': 'TECH-4D5E6'},
-            {'name': 'Healthcare', 'code': 'HS-7F8G9'},
-            {'name': 'Education', 'code': 'EDU-0H1I2'},
-            {'name': 'Accounting', 'code': 'ACC-3J4K5'},
-            {'name': 'Pharmaceutical', 'code': 'PHAR-6L7M8'},
-            {'name': 'Finance', 'code': 'FIN-9N0P1'},
-            {'name': 'Engineering', 'code': 'ENG-2Q3R4'},
+            {'name': 'Software & IT', 'code': 'IT-1A2B3'},
+            {'name': 'Medical & Healthcare', 'code': 'HS-7F8G9'},
+            {'name': 'Teaching & Education', 'code': 'EDU-0H1I2'},
+            {'name': 'Medicines', 'code': 'PHAR-6L7M8'},
+            {'name': 'Banking & Finance', 'code': 'FIN-9N0P1'},
             {'name': 'Real Estate', 'code': 'RE-5S6T7'},
-            {'name': 'Higher Education', 'code': 'HE-8U9V0'},
-            {'name': 'Sales', 'code': 'SALES-1W2X3'},
-            {'name': 'Government', 'code': 'GOV-4Y5Z6'},
-            {'name': 'Energy', 'code': 'ENERGY-7A8B9'},
-            {'name': 'Retail', 'code': 'RETAIL-0C1D2'},
-            {'name': 'Manufacturing', 'code': 'MANUF-3E4F5'},
-            {'name': 'Architecture', 'code': 'ARCH-6G7H8'},
-            {'name': 'Human Resources', 'code': 'HR-9I0J1'},
-            {'name': 'Nonprofit', 'code': 'NONPRO-2K3L4'},
-            {'name': 'Transportation', 'code': 'TRANSP-5M6N7'},
-            {'name': 'Hospitality', 'code': 'HOSP-8O9P0'}
+            {'name': 'Colleges & Universities', 'code': 'HE-8U9V0'},
+            {'name': 'Sales & Marketing', 'code': 'SALES-1W2X3'},
+            {'name': 'Shops & Retail', 'code': 'RETAIL-0C1D2'},
+            {'name': 'Hiring & HR', 'code': 'HR-9I0J1'},
+            {'name': 'Transport & Logistics', 'code': 'TRANSP-5M6N7'},
+            {'name': 'Hotels & Tourism', 'code': 'HOSP-8O9P0'},
+            {'name': 'Agriculture & Farming', 'code': 'AGRI-3B4C5'},
+            {'name': 'Entertainment & Media', 'code': 'MEDIA-6D7E8'},
+            {'name': 'Construction', 'code': 'CONST-2H3I4'},
+            {'name': 'Fashion & Beauty', 'code': 'FASHION-8L9M0'},
+            {'name': 'Food & Restaurants', 'code': 'FOOD-4P5Q6'},
+            {'name': 'Arts & Design', 'code': 'ART-7R8S9'},
+            {'name': 'Arts & Science', 'code': 'ARTSCIENCE-7R5M9'},
+            {'name': 'Sports & Fitness', 'code': 'SPORTS-0T1U2'},
+            {'name': 'Telecommunications', 'code': 'TELECOM-6X7Y8'}
         ]
 
         for industry in default_job_industries:
@@ -1173,7 +1172,6 @@ class Skills(models.Model):
                 {'name': 'Health Coaching', 'code': 'HS-5E9C3'}
             ],
 
-            # Previous industries (IT, TECH, HS) are already included
             'EDU': [
                 {'name': 'Teaching', 'code': 'EDU-A3F2D'},
                 {'name': 'Curriculum Design', 'code': 'EDU-9B1ZJ'},

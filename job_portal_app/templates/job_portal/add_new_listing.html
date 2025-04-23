@@ -896,19 +896,16 @@ input[type="date"]::-webkit-datetime-edit-day-field {
     formats: {
         underline: { inline: 'u', exact: true }
     },
-   paste_as_text: true,            // Forces paste to behave as plain text
-   forced_root_block: false,       // Prevents wrapping everything in <p>
-   content_style: "white-space: pre-line;", // Keeps line breaks
+   paste_as_text: true,          
+   forced_root_block: false,
+   content_style: "white-space: pre-line;",
    invalid_elements: 'span,div,script,img,table,blockquote',
    valid_elements: 'p,strong/b,em/i,u,ul,ol,li,br',
 });
 
     document.addEventListener('DOMContentLoaded', function() {
 
-
     const textarea = document.getElementById("id_description"); // Get textarea by ID
-
-
 
     if (textarea) {
         autoResize(textarea); // Resize initially if it has content
